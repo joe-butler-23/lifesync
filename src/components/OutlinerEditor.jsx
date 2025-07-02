@@ -49,7 +49,7 @@ const OutlinerEditor = ({ content, onChange }) => {
     
     for (let i = 0; i < currentView.length; i++) {
       if (i === 0) {
-        breadcrumbs.push({ id: 'root', content: 'Scratchpad' });
+        breadcrumbs.push({ id: 'root', content: 'Home' });
       } else {
         current = current.children.find(child => child.id === currentView[i]);
         if (current) {
@@ -259,9 +259,7 @@ const OutlinerEditor = ({ content, onChange }) => {
     return (
       <div key={node.id} className="select-none">
         <div 
-          className={`flex items-center group hover:bg-gray-50 rounded-sm transition-colors ${
-            isFocused ? 'bg-blue-50' : ''
-          }`}
+          className="flex items-center group hover:bg-gray-50 rounded-sm transition-colors"
           style={{ paddingLeft: `${depth * 20}px` }}
         >
           {/* Toggle button */}
@@ -370,7 +368,7 @@ const OutlinerEditor = ({ content, onChange }) => {
                 {index === 0 ? (
                   <div className="flex items-center space-x-1">
                     <Home size={14} />
-                    <span>Scratchpad</span>
+                    <span>Home</span>
                   </div>
                 ) : (
                   crumb.content || 'Untitled'
@@ -378,9 +376,7 @@ const OutlinerEditor = ({ content, onChange }) => {
               </button>
             </React.Fragment>
           ))}
-          <div className="ml-auto text-xs text-gray-400">
-            Press ESC to zoom out
-          </div>
+          
         </div>
       </div>
 

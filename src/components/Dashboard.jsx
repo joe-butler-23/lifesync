@@ -2,9 +2,7 @@ import React from 'react';
 import { CheckSquare, Utensils, Dumbbell, MessageCircle, Calendar, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import DeepnotesEditor from 'deepnotes-editor';
 import "deepnotes-editor/dist/deepnotes-editor.css";
-import EditTaskModal from './tasks/EditTaskModal';
 import { mockRecipes, mockWorkouts } from '../constants/mockData';
-import { toDateKey } from '../utils/dateUtils';
 
 const Dashboard = ({
   selectedDate,
@@ -13,6 +11,7 @@ const Dashboard = ({
   setShowDatePicker,
   tasks,
   getTasksForDate,
+  scratchpadContent,
   setScratchpadContent,
   handleTaskCompletionToggle,
   scheduledRecipes = {},
@@ -23,8 +22,7 @@ const Dashboard = ({
   setEditingTask,
   setShowEditTaskModal,
   editingTask,
-  showEditTaskModal,
-  scratchpadContent
+  showEditTaskModal
 }) => {
 
 

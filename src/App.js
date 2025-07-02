@@ -337,11 +337,30 @@ const LifeDashboardApp = () => {
   // Day Planner state
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [scratchpadContent, setScratchpadContent] = useState("");
+  const [scratchpadContent, setScratchpadContent] = useState(() => {
+    const dateKey = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD format
+    const stored = localStorage.getItem(`scratchpad-${dateKey}`);
+    return stored || JSON.stringify({
+      id: 'root',
+      content: '',
+      children: []
+    });
+  });
   const [dayTaskFilter, setDayTaskFilter] = useState("all"); // 'all', 'bridge_club', 'home', 'uncategorised'
 
   // Sidebar state
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  // Load scratchpad content when selected date changes
+  useEffect(() => {
+    const dateKey = selectedDate.toLocaleDateString('en-CA'); // YYYY-MM-DD format
+    const stored = localStorage.getItem(`scratchpad-${dateKey}`);
+    setScratchpadContent(stored || JSON.stringify({
+      id: 'root',
+      content: '',
+      children: []
+    }));
+  }, [selectedDate]);
 
   // Week navigation utilities (now imported from dateUtils)
 
@@ -1502,7 +1521,11 @@ const LifeDashboardApp = () => {
               <div className="min-h-[200px] border rounded-lg p-4 bg-gray-50">
                 <DeepnotesEditor
                   content={scratchpadContent}
-                  onChange={setScratchpadContent}
+                  onChange={(content) => {
+                    setScratchpadContent(content);
+                    const dateKey = selectedDate.toLocaleDateString('en-CA');
+                    localStorage.setItem(`scratchpad-${dateKey}`, content);
+                  }}
                   placeholder="Start typing your notes, ideas, or reminders..."
                   className="min-h-[160px] w-full border-none bg-transparent focus:outline-none"
                   style={{
@@ -2669,7 +2692,11 @@ const LifeDashboardApp = () => {
             tasks={tasks}
             getTasksForDate={getTasksForDate}
             scratchpadContent={scratchpadContent}
-            setScratchpadContent={setScratchpadContent}
+            setScratchpadContent={(content) => {
+              setScratchpadContent(content);
+              const dateKey = selectedDate.toLocaleDateString('en-CA');
+              localStorage.setItem(`scratchpad-${dateKey}`, content);
+            }}
             handleTaskCompletionToggle={handleTaskCompletionToggle}
             scheduledRecipes={scheduledRecipes}
             scheduledWorkouts={scheduledWorkouts}

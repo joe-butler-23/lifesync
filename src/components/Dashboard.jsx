@@ -32,7 +32,7 @@ const Dashboard = ({
   editingTask,
   showEditTaskModal,
 }) => {
-  const [isFullScreenScratchpad, setIsFullScreenScratchpad] = useState(false);
+  
 
   const navigateDay = (direction) => {
     const newDate = new Date(selectedDate);

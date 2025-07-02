@@ -433,7 +433,26 @@ const Dashboard = ({
                 Notes for {formatSelectedDate()}
               </span>
             </div>
-            <div className="min-h-[200px] border rounded-lg p-4 bg-gray-50">
+            <div className="min-h-[200px] border rounded-lg p-4 bg-gray-50 relative">
+              <button
+                className="absolute top-2 right-2 px-2 py-1 text-xs bg-white border rounded hover:bg-gray-100 z-10"
+                onClick={() => {
+                  // Reset zoom by triggering escape key or clicking outside
+                  const editorElement = document.querySelector('.deepnotes-editor');
+                  if (editorElement) {
+                    const escapeEvent = new KeyboardEvent('keydown', {
+                      key: 'Escape',
+                      keyCode: 27,
+                      which: 27,
+                      bubbles: true
+                    });
+                    editorElement.dispatchEvent(escapeEvent);
+                  }
+                }}
+                title="Zoom out / Reset view"
+              >
+                Zoom Out
+              </button>
               <DeepnotesEditor
                 content={scratchpadContent}
                 onChange={setScratchpadContent}
@@ -444,8 +463,8 @@ const Dashboard = ({
                   display: "flex",
                   alignItems: "center",
                 }}
-                toolbar={false}
-                showToolbar={false}
+                toolbar={true}
+                showToolbar={true}
               />
             </div>
           </div>

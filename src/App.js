@@ -274,6 +274,9 @@ const LifeDashboardApp = () => {
   const [scratchpadContent, setScratchpadContent] = useState('');
   const [dayTaskFilter, setDayTaskFilter] = useState('all'); // 'all', 'bridge_club', 'home', 'uncategorised'
 
+  // Sidebar state
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
   // Week navigation utilities (now imported from dateUtils)
 
   const navigateWeek = (direction) => {
@@ -2381,7 +2384,12 @@ const LifeDashboardApp = () => {
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <div className="flex h-screen bg-gray-100">
-        <Sidebar activeView={activeView} setActiveView={setActiveView} />
+        <Sidebar 
+          activeView={activeView} 
+          setActiveView={setActiveView} 
+          isCollapsed={sidebarCollapsed}
+          setIsCollapsed={setSidebarCollapsed}
+        />
         <div className="flex-1 overflow-auto">
           {renderContent()}
         </div>

@@ -10,6 +10,11 @@ import GoogleCalendarService from './services/GoogleCalendarService';
 import Sidebar from './components/common/Sidebar';
 import EditTaskModal from './components/tasks/EditTaskModal';
 import EditEventModal from './components/events/EditEventModal';
+import Dashboard from './components/Dashboard';
+import WeeklyPlanner from './components/WeeklyPlanner';
+import TasksView from './components/TasksView';
+import ClaudeAssistant from './components/ClaudeAssistant';
+import Settings from './components/Settings';
 
 // Constants and utilities
 import { mockWorkouts, mockRecipes, localTasks } from './constants/mockData';
@@ -2120,15 +2125,77 @@ const LifeDashboardApp = () => {
   const renderContent = () => {
     switch(activeView) {
       case 'dashboard':
-        return renderDashboard();
+        return (
+          <Dashboard
+            selectedDate={selectedDate}
+            setSelectedDate={setSelectedDate}
+            showDatePicker={showDatePicker}
+            setShowDatePicker={setShowDatePicker}
+            tasks={tasks}
+            getTasksForDate={getTasksForDate}
+            scratchpadContent={scratchpadContent}
+            setScratchpadContent={setScratchpadContent}
+            handleTaskCompletionToggle={handleTaskCompletionToggle}
+          />
+        );
       case 'planner':
-        return renderWeeklyPlanner();
+        return (
+          <WeeklyPlanner
+            currentWeekStart={currentWeekStart}
+            navigateWeek={navigateWeek}
+            weekDates={weekDates}
+            getTasksForDate={getTasksForDate}
+          />
+        );
       case 'tasks':
-        return renderTasksView(); // New view for tasks
+        return (
+          <TasksView
+            tasks={tasks}
+            todoistToken={todoistToken}
+            loadingTodoistTasks={loadingTodoistTasks}
+            todoistError={todoistError}
+            fetchTodoistTasks={fetchTodoistTasks}
+            setShowAddTaskModal={setShowAddTaskModal}
+            showAddTaskModal={showAddTaskModal}
+            newTaskContent={newTaskContent}
+            setNewTaskContent={setNewTaskContent}
+            newTaskPriority={newTaskPriority}
+            setNewTaskPriority={setNewTaskPriority}
+            newTaskDueDate={newTaskDueDate}
+            setNewTaskDueDate={setNewTaskDueDate}
+            newTaskDueDateMode={newTaskDueDateMode}
+            setNewTaskDueDateMode={setNewTaskDueDateMode}
+            handleAddTask={handleAddTask}
+            handleDeleteTask={handleDeleteTask}
+            handleTaskCompletionToggle={handleTaskCompletionToggle}
+            setEditingTask={setEditingTask}
+            setShowEditTaskModal={setShowEditTaskModal}
+            activeFilters={activeFilters}
+            setActiveFilters={setActiveFilters}
+            sortBy={sortBy}
+            setSortBy={setSortBy}
+            groupBy={groupBy}
+            setGroupBy={setGroupBy}
+            selectedProjects={selectedProjects}
+            setSelectedProjects={setSelectedProjects}
+            availableProjects={availableProjects}
+          />
+        );
       case 'claude':
-        return renderClaudeAssistant();
+        return <ClaudeAssistant />;
       case 'settings':
-        return renderSettings();
+        return (
+          <Settings
+            todoistToken={todoistToken}
+            setTodoistToken={setTodoistToken}
+            handleSaveTodoistToken={handleSaveTodoistToken}
+            todoistError={todoistError}
+            googleCalendarToken={googleCalendarToken}
+            handleGoogleAuthClick={handleGoogleAuthClick}
+            googleCalendarError={googleCalendarError}
+            loadingGoogleCalendarEvents={loadingGoogleCalendarEvents}
+          />
+        );
       default:
         return (
           <div className="p-6 flex items-center justify-center h-full">

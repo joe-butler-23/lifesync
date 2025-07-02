@@ -35,6 +35,8 @@ import {
   isTaskOverdue,
   isTaskDueToday,
   isTaskDueThisWeek,
+  toDateKey,
+  parseDateKey,
 } from "./utils/dateUtils";
 import {
   getFilteredTasks,
@@ -348,7 +350,7 @@ const LifeDashboardApp = () => {
   };
 
   const getTasksForDate = (date) => {
-    const dateString = date.toISOString().split("T")[0];
+    const dateString = toDateKey(date);
     const dayTasks = tasks.filter(
       (task) => task.due && task.due.startsWith(dateString) && !task.completed,
     );
@@ -388,9 +390,7 @@ const LifeDashboardApp = () => {
       }
 
       // Update local state immediately (optimistic update)
-      const newDueDate = targetDate
-        ? targetDate.toISOString().split("T")[0]
-        : null;
+      const newDueDate = targetDate ? toDateKey(targetDate) : null;
       setTodoistTasks((prevTasks) =>
         prevTasks.map((task) =>
           task.id === taskId ? { ...task, due: newDueDate } : task,
@@ -399,7 +399,7 @@ const LifeDashboardApp = () => {
 
       // Handle reordering and cross-column positioning
       if (targetDate && insertPosition !== null) {
-        const dateKey = targetDate.toISOString().split("T")[0];
+        const dateKey = toDateKey(targetDate);
         setTaskOrder((prevOrder) => {
           const newOrderState = { ...prevOrder };
 
@@ -432,7 +432,7 @@ const LifeDashboardApp = () => {
           updateData = { due_string: null };
         } else {
           // Dropping to a day - set due date
-          const dateString = targetDate.toISOString().split("T")[0];
+          const dateString = toDateKey(targetDate);
           updateData = { due_string: dateString };
         }
 
@@ -1055,7 +1055,7 @@ const LifeDashboardApp = () => {
         // Try to convert to YYYY-MM-DD format for date input
         const date = new Date(dateValue);
         if (!isNaN(date.getTime())) {
-          return date.toISOString().split("T")[0];
+          return toDateKey(date);
         }
       }
       return dateValue;
@@ -1137,7 +1137,7 @@ const LifeDashboardApp = () => {
     };
 
     // Get data for selected date
-    const selectedDateKey = selectedDate.toISOString().split("T")[0];
+    const selectedDateKey = toDateKey(selectedDate);
     const dayTasks = getTasksForDate(selectedDate, taskOrder);
     const dayRecipes = scheduledRecipes[selectedDateKey] || {
       lunch: [],
@@ -1216,7 +1216,7 @@ const LifeDashboardApp = () => {
             <div className="mt-4 flex justify-center">
               <input
                 type="date"
-                value={selectedDate.toISOString().split("T")[0]}
+                value={toDateKey(selectedDate)}
                 onChange={(e) => {
                   setSelectedDate(new Date(e.target.value));
                   setShowDatePicker(false);
@@ -1710,11 +1710,11 @@ const LifeDashboardApp = () => {
 
     // Day column components for different modes
     const TaskModeDay = ({ date, dayName }) => {
-      const dateKey = date.toISOString().split("T")[0];
+      const dateKey = toDateKey(date);
       const dayTasks = getTasksForDate(date);
       const dayEvents = googleCalendarEvents.filter((event) => {
         const eventDate = new Date(event.start);
-        return eventDate.toISOString().split("T")[0] === dateKey;
+        return toDateKey(eventDate) === dateKey;
       });
 
       return (
@@ -1784,7 +1784,7 @@ const LifeDashboardApp = () => {
     };
 
     const RecipeModeDay = ({ date, dayName }) => {
-      const dateKey = date.toISOString().split("T")[0];
+      const dateKey = toDateKey(date);
       const dayRecipes = scheduledRecipes[dateKey] || { lunch: [], dinner: [] };
 
       return (
@@ -1851,7 +1851,7 @@ const LifeDashboardApp = () => {
     };
 
     const WorkoutModeDay = ({ date, dayName }) => {
-      const dateKey = date.toISOString().split("T")[0];
+      const dateKey = toDateKey(date);
       const dayWorkouts = scheduledWorkouts[dateKey] || [];
 
       return (
@@ -2150,13 +2150,13 @@ const LifeDashboardApp = () => {
     };
 
     const AllModeDay = ({ date, dayName }) => {
-      const dateKey = date.toISOString().split("T")[0];
+      const dateKey = toDateKey(date);
       const dayTasks = getTasksForDate(date);
       const dayRecipes = scheduledRecipes[dateKey] || { lunch: [], dinner: [] };
       const dayWorkouts = scheduledWorkouts[dateKey] || [];
       const dayEvents = googleCalendarEvents.filter((event) => {
         const eventDate = new Date(event.start);
-        return eventDate.toISOString().split("T")[0] === dateKey;
+        return toDateKey(eventDate) === dateKey;
       });
 
       return (
@@ -2310,7 +2310,7 @@ const LifeDashboardApp = () => {
       switch (plannerMode) {
         case "recipes":
           return weekDates.map((date) => {
-            const dateKey = date.toISOString().split("T")[0];
+            const dateKey = toDateKey(date);
             return (
               <RecipeModeDay
                 key={dateKey}
@@ -2321,7 +2321,7 @@ const LifeDashboardApp = () => {
           });
         case "workouts":
           return weekDates.map((date) => {
-            const dateKey = date.toISOString().split("T")[0];
+            const dateKey = toDateKey(date);
             return (
               <WorkoutModeDay
                 key={dateKey}
@@ -2332,7 +2332,7 @@ const LifeDashboardApp = () => {
           });
         case "all":
           return weekDates.map((date) => {
-            const dateKey = date.toISOString().split("T")[0];
+            const dateKey = toDateKey(date);
             return (
               <AllModeDay
                 key={dateKey}
@@ -2343,7 +2343,7 @@ const LifeDashboardApp = () => {
           });
         default:
           return weekDates.map((date) => {
-            const dateKey = date.toISOString().split("T")[0];
+            const dateKey = toDateKey(date);
             return (
               <TaskModeDay
                 key={dateKey}
@@ -2653,7 +2653,8 @@ const LifeDashboardApp = () => {
         <div className="flex items-end space-x-3">
           <input
             type="text"
-            placeholder="Your Todoist API Token"className="flex-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="Your Todoist API Token"
+            className="flex-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             value={todoistToken}
             onChange={(e) => setTodoistToken(e.target.value)}
           />
@@ -2805,7 +2806,10 @@ const LifeDashboardApp = () => {
       }
 
       // If dropped in the same position, do nothing
-      if (destination.droppableId === source.droppableId && destination.index === source.index) {
+      if (
+        destination.droppableId === source.droppableId &&
+        destination.index === source.index
+      ) {
         return;
       }
 
@@ -2863,7 +2867,11 @@ const LifeDashboardApp = () => {
               ) {
                 Object.keys(newScheduled[existingDateKey]).forEach(
                   (existingMealType) => {
-                    if (Array.isArray(newScheduled[existingDateKey][existingMealType])) {
+                    if (
+                      Array.isArray(
+                        newScheduled[existingDateKey][existingMealType],
+                      )
+                    ) {
                       newScheduled[existingDateKey][existingMealType] =
                         newScheduled[existingDateKey][existingMealType].filter(
                           (id) => id !== draggableId,
@@ -2887,8 +2895,7 @@ const LifeDashboardApp = () => {
             targetArray.splice(destination.index, 0, draggableId);
             newScheduled[dateKey][mealType] = targetArray;
 
-            if (DEBUG)
-              console.log("Updated scheduled recipes:", newScheduled);
+            if (DEBUG) console.log("Updated scheduled recipes:", newScheduled);
             return newScheduled;
           });
           return;
@@ -2996,7 +3003,10 @@ const LifeDashboardApp = () => {
 
         // Handle drops to specific day containers with meal types or workouts
         const parts = destination.droppableId.split("-");
-        if (parts.length >= 4 && (parts[3] === "lunch" || parts[3] === "dinner")) {
+        if (
+          parts.length >= 4 &&
+          (parts[3] === "lunch" || parts[3] === "dinner")
+        ) {
           // Recipe drop with meal type (e.g., "2025-01-01-lunch")
           const dateKey = `${parts[0]}-${parts[1]}-${parts[2]}`;
           const mealType = parts[3];
@@ -3011,7 +3021,11 @@ const LifeDashboardApp = () => {
               ) {
                 Object.keys(newScheduled[existingDateKey]).forEach(
                   (existingMealType) => {
-                    if (Array.isArray(newScheduled[existingDateKey][existingMealType])) {
+                    if (
+                      Array.isArray(
+                        newScheduled[existingDateKey][existingMealType],
+                      )
+                    ) {
                       newScheduled[existingDateKey][existingMealType] =
                         newScheduled[existingDateKey][existingMealType].filter(
                           (id) => id !== draggableId,
@@ -3059,7 +3073,7 @@ const LifeDashboardApp = () => {
         } else {
           try {
             // Task drop to a date
-            const destDate = new Date(destination.droppableId);
+            const destDate = parseDateKey(destination.droppableId);
             if (isNaN(destDate.getTime())) {
               console.error(
                 "Invalid date for task scheduling:",
@@ -3082,7 +3096,7 @@ const LifeDashboardApp = () => {
       }
 
       try {
-        const destDate = new Date(destination.droppableId);
+        const destDate = parseDateKey(destination.droppableId);
         if (isNaN(destDate.getTime())) {
           console.error(
             "Invalid date for task scheduling:",
@@ -3095,7 +3109,15 @@ const LifeDashboardApp = () => {
         console.error("Error handling task drop:", error);
       }
     },
-    [plannerMode, setScheduledRecipes, setScheduledWorkouts, handleTaskDrop, mockRecipes, mockWorkouts]);
+    [
+      plannerMode,
+      setScheduledRecipes,
+      setScheduledWorkouts,
+      handleTaskDrop,
+      mockRecipes,
+      mockWorkouts,
+    ],
+  );
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>

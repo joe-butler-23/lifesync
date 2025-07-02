@@ -1,4 +1,9 @@
-import { isTaskOverdue, isTaskDueToday, isTaskDueThisWeek } from "./dateUtils";
+import {
+  isTaskOverdue,
+  isTaskDueToday,
+  isTaskDueThisWeek,
+  toDateKey,
+} from "./dateUtils";
 
 export const getFilteredTasks = (tasks, activeFilters, selectedProjects) => {
   let filtered = tasks.filter(
@@ -151,7 +156,7 @@ export const getUnscheduledTasks = (tasks, taskFilter) => {
 };
 
 export const getTasksForDate = (tasks, date, taskOrder) => {
-  const dateString = date.toISOString().split("T")[0];
+  const dateString = toDateKey(date);
   const dayTasks = tasks.filter(
     (task) => task.due && task.due.startsWith(dateString) && !task.completed,
   );

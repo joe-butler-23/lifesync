@@ -43,6 +43,7 @@ import {
   getSortedTasks,
   getGroupedTasks,
   toggleFilter,
+  getUnscheduledTasks as filterUnscheduledTasks,
 } from "./utils/taskUtils";
 
 const DEBUG = process.env.NODE_ENV !== "production";
@@ -844,21 +845,6 @@ const LifeDashboardApp = () => {
                           {task.content || task.title}
                         </p>
                         <div className="flex items-center text-xs text-gray-500 mt-1 space-x-2">
-                          {task.priority && (
-                            <span
-                              className={`px-2 py-1 rounded-full ${
-                                task.priority === 4
-                                  ? "bg-red-100 text-red-600"
-                                  : task.priority === 3
-                                    ? "bg-yellow-100 text-yellow-600"
-                                    : task.priority === 2
-                                      ? "bg-green-100 text-green-600"
-                                      : "bg-gray-100 text-gray-600"
-                              }`}
-                            >
-                              P{task.priority}
-                            </span>
-                          )}
                           {task.project_name && (
                             <span className="px-2 py-1 bg-blue-100 text-blue-600 rounded-full">
                               {task.project_name
@@ -1485,21 +1471,6 @@ const LifeDashboardApp = () => {
                               {task.content || task.title}
                             </p>
                             <div className="flex items-center space-x-2 text-xs mt-1">
-                              {task.priority && (
-                                <span
-                                  className={`px-2 py-1 rounded-full ${
-                                    task.priority === 4
-                                      ? "bg-red-100 text-red-600"
-                                      : task.priority === 3
-                                        ? "bg-yellow-100 text-yellow-600"
-                                        : task.priority === 2
-                                          ? "bg-green-100 text-green-600"
-                                          : "bg-gray-100 text-gray-600"
-                                  }`}
-                                >
-                                  P{task.priority}
-                                </span>
-                              )}
                               {task.project_name && (
                                 <span className="px-2 py-1 bg-blue-100 text-blue-600 rounded-full">
                                   {task.project_name}
@@ -1574,24 +1545,7 @@ const LifeDashboardApp = () => {
                   {task.content}
                 </p>
                 <div className="flex items-center text-xs mt-1 space-x-1">
-                  {task.priority && (
-                    <span
-                      className={`px-1 py-0.5 rounded-full ${
-                        isScheduled
-                          ? "bg-red-200 text-red-700"
-                          : task.priority === 4
-                            ? "bg-red-100 text-red-600"
-                            : task.priority === 3
-                              ? "bg-yellow-100 text-yellow-600"
-                              : task.priority === 2
-                                ? "bg-green-100 text-green-600"
-                                : "bg-gray-100 text-gray-600"
-                      }`}
-                    >
-                      P{task.priority}
-                    </span>
-                  )}
-                </div>
+                  </div>
               </div>
               <GripVertical
                 className={`w-3 h-3 opacity-0 group-hover:opacity-100 ${
@@ -1999,15 +1953,10 @@ const LifeDashboardApp = () => {
             return dueDate < startOfCurrentWeek && !task.completed;
           });
 
-          const getUnscheduledTasks = () =>
-            tasks.filter(
-              (task) =>
-                task.source === "todoist" &&
-                !task.completed &&
-                !task.due && // Only truly unscheduled tasks (no due date)
-                (!task.project_name ||
-                  task.project_name.toLowerCase() !== "shopping list"),
-            );
+          const filteredUnscheduledTasks = filterUnscheduledTasks(
+            tasks,
+            taskFilter,
+          );
 
           return (
             <div className="w-80 bg-white rounded-xl p-4 shadow-sm border">
@@ -2120,14 +2069,14 @@ const LifeDashboardApp = () => {
                     className="space-y-2 max-h-96 overflow-y-auto"
                   >
                     <h3 className="font-semibold text-gray-900 mb-4">
-                      Unscheduled Tasks ({unscheduledTasks.length})
+                      Unscheduled Tasks ({filteredUnscheduledTasks.length})
                     </h3>
-                    {unscheduledTasks.length === 0 ? (
+                    {filteredUnscheduledTasks.length === 0 ? (
                       <p className="text-gray-500 text-sm">
                         No unscheduled tasks
                       </p>
                     ) : (
-                      unscheduledTasks.map((task, index) => (
+                      filteredUnscheduledTasks.map((task, index) => (
                         <DraggableTask
                           key={task.id}
                           task={task}

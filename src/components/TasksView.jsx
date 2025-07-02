@@ -266,9 +266,9 @@ const TasksView = (props) => {
       <div className="bg-white rounded-xl border shadow-sm mb-6">
         {/* Always Visible Top Bar */}
         <div className="p-4">
-          <div className="flex items-center gap-4 mb-4">
+          <div className="flex items-center gap-4 flex-wrap">
             {/* Search Box */}
-            <div className="relative flex-1 max-w-md">
+            <div className="relative max-w-xs">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <input
                 type="text"
@@ -287,7 +287,71 @@ const TasksView = (props) => {
               )}
             </div>
 
-            {/* Quick Sort & Group */}
+            {/* Quick Filter Presets */}
+            <div className="flex flex-wrap gap-2">
+              {quickFilters.map((filter) => {
+                const Icon = filter.icon;
+                const isActive = activeFilters.has(filter.key);
+                return (
+                  <button
+                    key={filter.key}
+                    onClick={(e) =>
+                      toggleFilter(
+                        filter.key,
+                        activeFilters,
+                        setActiveFilters,
+                        setSelectedProjects,
+                        e,
+                      )
+                    }
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
+                      isActive
+                        ? "bg-blue-600 text-white shadow-sm"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
+                  >
+                    <Icon className="w-3.5 h-3.5" />
+                    {filter.label}
+                    <span
+                      className={`ml-1 px-1.5 py-0.5 rounded-full text-xs ${
+                        isActive
+                          ? "bg-blue-500 text-blue-100"
+                          : "bg-gray-200 text-gray-600"
+                      }`}
+                    >
+                      {filter.count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* Advanced Filters Accordion */}
+        <div className="border-t border-gray-200">
+          <div className="flex items-center justify-between p-4">
+            <button
+              onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+              className="flex items-center gap-2 hover:bg-gray-50 transition-colors px-2 py-1 rounded"
+            >
+              <Filter className="w-4 h-4 text-gray-500" />
+              <span className="font-medium text-gray-700">
+                Advanced Filters
+              </span>
+              {(priorityFilter.length > 0 || selectedLabels.size > 0) && (
+                <span className="bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded-full font-medium">
+                  {priorityFilter.length + selectedLabels.size} active
+                </span>
+              )}
+              <ChevronDown
+                className={`w-4 h-4 text-gray-500 transition-transform ${
+                  showAdvancedFilters ? "rotate-180" : ""
+                }`}
+              />
+            </button>
+
+            {/* Sort & Group Controls */}
             <div className="flex items-center gap-2">
               <select
                 value={sortBy}
@@ -313,70 +377,6 @@ const TasksView = (props) => {
               </select>
             </div>
           </div>
-
-          {/* Quick Filter Presets */}
-          <div className="flex flex-wrap gap-2">
-            {quickFilters.map((filter) => {
-              const Icon = filter.icon;
-              const isActive = activeFilters.has(filter.key);
-              return (
-                <button
-                  key={filter.key}
-                  onClick={(e) =>
-                    toggleFilter(
-                      filter.key,
-                      activeFilters,
-                      setActiveFilters,
-                      setSelectedProjects,
-                      e,
-                    )
-                  }
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
-                    isActive
-                      ? "bg-blue-600 text-white shadow-sm"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
-                >
-                  <Icon className="w-3.5 h-3.5" />
-                  {filter.label}
-                  <span
-                    className={`ml-1 px-1.5 py-0.5 rounded-full text-xs ${
-                      isActive
-                        ? "bg-blue-500 text-blue-100"
-                        : "bg-gray-200 text-gray-600"
-                    }`}
-                  >
-                    {filter.count}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Advanced Filters Accordion */}
-        <div className="border-t border-gray-200">
-          <button
-            onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-            className="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 transition-colors"
-          >
-            <div className="flex items-center gap-2">
-              <Filter className="w-4 h-4 text-gray-500" />
-              <span className="font-medium text-gray-700">
-                Advanced Filters
-              </span>
-              {(priorityFilter.length > 0 || selectedLabels.size > 0) && (
-                <span className="bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded-full font-medium">
-                  {priorityFilter.length + selectedLabels.size} active
-                </span>
-              )}
-            </div>
-            <ChevronDown
-              className={`w-4 h-4 text-gray-500 transition-transform ${
-                showAdvancedFilters ? "rotate-180" : ""
-              }`}
-            />
-          </button>
 
           {showAdvancedFilters && (
             <div className="p-4 bg-gray-50 border-t border-gray-200">

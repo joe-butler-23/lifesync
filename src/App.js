@@ -908,7 +908,7 @@ const LifeDashboardApp = () => {
                             title="Delete Task"
                           >
                             <svg
-                              xmlns="http://www.w3.org/2000/svg"
+                              xmlns="http://www.w3.org/2000/svg```python
                               width="20"
                               height="20"
                               viewBox="0 0 24 24"
@@ -2653,8 +2653,7 @@ const LifeDashboardApp = () => {
         <div className="flex items-end space-x-3">
           <input
             type="text"
-            placeholder="Your Todoist API Token"
-            className="flex-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="Your Todoist API Token"className="flex-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             value={todoistToken}
             onChange={(e) => setTodoistToken(e.target.value)}
           />

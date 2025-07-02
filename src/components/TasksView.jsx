@@ -717,19 +717,27 @@ const TasksView = (props) => {
                                 {groupTasks.map((task) => (
                                   <div
                                     key={task.id}
-                                    className="bg-white rounded-xl p-4 shadow-sm border flex items-center justify-between hover:shadow-md transition-shadow"
+                                    className="bg-white rounded-xl p-4 shadow-sm border flex items-center justify-between hover:shadow-md transition-shadow cursor-pointer"
+                                    onClick={() => {
+                                      if (task.source === "todoist") {
+                                        setEditingTask(task);
+                                        setShowEditTaskModal(true);
+                                      }
+                                    }}
                                   >
                                     <div className="flex items-center">
                                       <input
                                         type="checkbox"
                                         className="mr-3 rounded"
                                         checked={task.completed}
-                                        onChange={() =>
+                                        onChange={(e) => {
+                                          e.stopPropagation();
                                           handleTaskCompletionToggle(
                                             task.id,
                                             task.completed,
-                                          )
-                                        }
+                                          );
+                                        }}
+                                        onClick={(e) => e.stopPropagation()}
                                       />
                                       <div>
                                         <p
@@ -795,75 +803,43 @@ const TasksView = (props) => {
                                     </div>
                                     <div className="flex items-center space-x-2">
                                       {task.source === "todoist" && (
-                                        <>
-                                          <button
-                                            onClick={() =>
-                                              handleDeleteTask(task.id)
-                                            }
-                                            className="p-1 rounded-full hover:bg-gray-200 text-red-500"
-                                            title="Delete Task"
+                                        <button
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleDeleteTask(task.id);
+                                          }}
+                                          className="p-1 rounded-full hover:bg-gray-200 text-red-500"
+                                          title="Delete Task"
+                                        >
+                                          <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            width="20"
+                                            height="20"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeWidth="2"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            className="lucide lucide-trash-2"
                                           >
-                                            <svg
-                                              xmlns="http://www.w3.org/2000/svg"
-                                              width="20"
-                                              height="20"
-                                              viewBox="0 0 24 24"
-                                              fill="none"
-                                              stroke="currentColor"
-                                              strokeWidth="2"
-                                              strokeLinecap="round"
-                                              strokeLinejoin="round"
-                                              className="lucide lucide-trash-2"
-                                            >
-                                              <path d="M3 6h18" />
-                                              <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                                              <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                                              <line
-                                                x1="10"
-                                                x2="10"
-                                                y1="11"
-                                                y2="17"
-                                              />
-                                              <line
-                                                x1="14"
-                                                x2="14"
-                                                y1="11"
-                                                y2="17"
-                                              />
-                                            </svg>
-                                          </button>
-                                          <button
-                                            onClick={() => {
-                                              setEditingTask(task);
-                                              setShowEditTaskModal(true);
-                                            }}
-                                            className="p-1 rounded-full hover:bg-gray-200 text-blue-500"
-                                            title="Edit Task"
-                                          >
-                                            <svg
-                                              xmlns="http://www.w3.org/2000/svg"
-                                              width="20"
-                                              height="20"
-                                              viewBox="0 0 24 24"
-                                              fill="none"
-                                              stroke="currentColor"
-                                              strokeWidth="2"
-                                              strokeLinecap="round"
-                                              strokeLinejoin="round"
-                                              className="lucide lucide-edit"
-                                            >
-                                              <path d="M22 13.0476V22H2V2h10.0476" />
-                                              <path d="M17.477 3.35146 14.07 6.75841" />
-                                              <path d="M14.07 6.75841 12.042 4.73045" />
-                                              <path d="M12.042 4.73045 15.449 1.3235" />
-                                              <path d="M15.449 1.3235 17.477 3.35146" />
-                                              <path d="M17.477 3.35146 20.884 6.75841" />
-                                              <path d="M20.884 6.75841 18.856 8.78637" />
-                                              <path d="M18.856 8.78637 15.449 5.37941" />
-                                              <path d="M15.449 5.37941 17.477 3.35146Z" />
-                                            </svg>
-                                          </button>
-                                        </>
+                                            <path d="M3 6h18" />
+                                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                                            <line
+                                              x1="10"
+                                              x2="10"
+                                              y1="11"
+                                              y2="17"
+                                            />
+                                            <line
+                                              x1="14"
+                                              x2="14"
+                                              y1="11"
+                                              y2="17"
+                                            />
+                                          </svg>
+                                        </button>
                                       )}
                                     </div>
                                   </div>

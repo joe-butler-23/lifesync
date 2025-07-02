@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 
 const EditTaskModal = ({ task, onClose, onSave }) => {
   const [content, setContent] = useState(task?.content || '');
+  const [description, setDescription] = useState(task?.description || '');
   const [priority, setPriority] = useState(task?.priority || 1);
   const [dueDate, setDueDate] = useState(task?.due || '');
 
   const handleSave = () => {
     const updates = {
       content,
+      description,
       priority,
       due_string: dueDate || null
     };
@@ -29,6 +31,20 @@ const EditTaskModal = ({ task, onClose, onSave }) => {
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             value={content}
             onChange={(e) => setContent(e.target.value)}
+          />
+        </div>
+
+        <div className="mb-4">
+          <label htmlFor="taskDescription" className="block text-gray-700 text-sm font-bold mb-2">
+            Description
+          </label>
+          <textarea
+            id="taskDescription"
+            rows="3"
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline resize-vertical"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Add a description for this task..."
           />
         </div>
 

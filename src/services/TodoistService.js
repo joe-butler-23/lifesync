@@ -2,33 +2,47 @@ const API_BASE_URL = 'https://api.todoist.com/rest/v2';
 
 class TodoistService {
   static async getTasks(token) {
-    const response = await fetch(`${API_BASE_URL}/tasks`, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
+    try {
+      const response = await fetch(`${API_BASE_URL}/tasks`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        mode: 'cors'
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch tasks: ${response.status} ${response.statusText}`);
       }
-    });
 
-    if (!response.ok) {
-      throw new Error(`Failed to fetch tasks: ${response.statusText}`);
+      return response.json();
+    } catch (error) {
+      console.error('TodoistService.getTasks error:', error);
+      throw new Error(`Network error: ${error.message}`);
     }
-
-    return response.json();
   }
 
   static async getProjects(token) {
-    const response = await fetch(`${API_BASE_URL}/projects`, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
+    try {
+      const response = await fetch(`${API_BASE_URL}/projects`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        mode: 'cors'
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch projects: ${response.status} ${response.statusText}`);
       }
-    });
 
-    if (!response.ok) {
-      throw new Error(`Failed to fetch projects: ${response.statusText}`);
+      return response.json();
+    } catch (error) {
+      console.error('TodoistService.getProjects error:', error);
+      throw new Error(`Network error: ${error.message}`);
     }
-
-    return response.json();
   }
 
   static async addTask(token, taskData) {

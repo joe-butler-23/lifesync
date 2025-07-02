@@ -1,11 +1,13 @@
-import React from 'react';
-import { CheckSquare, Utensils, Dumbbell, MessageCircle, Calendar, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { ChevronRight, ChevronDown, Calendar, Clock, MapPin, AlertCircle, CheckSquare, Edit3, Save, X, Trash2, MoreHorizontal, Filter, Plus } from 'lucide-react';
 import OutlinerEditor from './OutlinerEditor';
-import { mockRecipes, mockWorkouts } from '../constants/mockData';
+import ClaudeAssistant from './ClaudeAssistant';
 
-const Dashboard = ({
-  selectedDate,
-  setSelectedDate,
+function Dashboard({
+  currentView,
+  weekDates,
+  currentWeekStart,
+  unscheduledTasks,
   tasks,
   getTasksForDate,
   scratchpadContent,
@@ -53,6 +55,8 @@ const Dashboard = ({
   const dayWorkouts = scheduledWorkouts[selectedDateKey] || [];
 
   // Filter tasks based on dayTaskFilter
+  const [dayTaskFilter, setDayTaskFilter] = useState('all');
+
   const getFilteredDayTasks = () => {
     let filtered = dayTasks;
 
@@ -85,7 +89,10 @@ const Dashboard = ({
   };
 
   const filteredDayTasks = getFilteredDayTasks();
-
+  const [showDatePicker, setShowDatePicker] = useState(false); // Added missing state
+  const [editingTask, setEditingTask] = useState(null); // Added missing state
+  const [showEditTaskModal, setShowEditTaskModal] = useState(false); // Added missing state
+  const [showAddTaskModal, setShowAddTaskModal] = useState(false);
   return (
     <div className="p-6 space-y-6">
       {/* Day Navigation */}

@@ -1,20 +1,10 @@
-import React from "react";
-import {
-  Calendar,
-  CheckSquare,
-  Utensils,
-  Dumbbell,
-  MessageCircle,
-  ChevronLeft,
-  ChevronRight,
-  Plus,
-} from "lucide-react";
-import DeepnotesEditor from "deepnotes-editor";
+import React from 'react';
+import { CheckSquare, Utensils, Dumbbell, MessageCircle, Calendar, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
+import DeepnotesEditor from 'deepnotes-editor';
 import "deepnotes-editor/dist/deepnotes-editor.css";
-import { toDateKey } from "../utils/dateUtils";
-import { mockWorkouts, mockRecipes } from "../constants/mockData";
-import ClaudeButton from "./ClaudeButton";
-import { useClaudeIntegration } from "../hooks/useClaudeIntegration";
+import EditTaskModal from './tasks/EditTaskModal';
+import { mockRecipes, mockWorkouts } from '../constants/mockData';
+import { toDateKey } from '../utils/dateUtils';
 
 const Dashboard = ({
   selectedDate,
@@ -23,18 +13,18 @@ const Dashboard = ({
   setShowDatePicker,
   tasks,
   getTasksForDate,
-  scratchpadContent,
   setScratchpadContent,
   handleTaskCompletionToggle,
   scheduledRecipes = {},
   scheduledWorkouts = {},
-  dayTaskFilter = "all",
+  dayTaskFilter,
   setDayTaskFilter,
   setShowAddTaskModal,
   setEditingTask,
   setShowEditTaskModal,
   editingTask,
   showEditTaskModal,
+  scratchpadContent
 }) => {
 
 
@@ -129,7 +119,7 @@ const Dashboard = ({
             >
               <Calendar className="w-5 h-5" />
             </button>
-              <ClaudeButton 
+              {/* <ClaudeButton 
                 component="Dashboard"
                 componentState={{
                   selectedDate: formatSelectedDate(),
@@ -137,7 +127,7 @@ const Dashboard = ({
                   workoutsCount: dayWorkouts.length,
                   mealsPlanned: dayRecipes.lunch.length + dayRecipes.dinner.length
                 }}
-              />
+              /> */}
           </div>
 
           <button

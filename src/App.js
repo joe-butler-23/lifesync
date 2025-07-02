@@ -65,6 +65,12 @@ const LifeDashboardApp = () => {
     useState(false);
   const [googleCalendarError, setGoogleCalendarError] = useState(null);
   const [availableProjects, setAvailableProjects] = useState([]); // Initialize availableProjects here
+  
+  // Claude API integration state
+  const [claudeApiKey, setClaudeApiKey] = useState(
+    localStorage.getItem("claudeApiKey") || ""
+  );
+  const [claudeApiError, setClaudeApiError] = useState(null);
   // Week start state - must be declared early since other functions depend on it
   const [currentWeekStart, setCurrentWeekStart] = useState(() => {
     const today = new Date();
@@ -306,6 +312,16 @@ const LifeDashboardApp = () => {
       fetchTodoistTasks(todoistToken);
     } else {
       setTodoistError(new Error("Please enter a Todoist API token."));
+    }
+  };
+
+  const handleSaveClaudeApiKey = () => {
+    if (claudeApiKey.trim()) {
+      localStorage.setItem("claudeApiKey", claudeApiKey);
+      setClaudeApiError(null);
+      // You can add validation here if needed
+    } else {
+      setClaudeApiError(new Error("Please enter a valid Anthropic API key."));
     }
   };
 
@@ -2759,6 +2775,10 @@ const LifeDashboardApp = () => {
             handleGoogleAuthClick={handleGoogleAuthClick}
             googleCalendarError={googleCalendarError}
             loadingGoogleCalendarEvents={loadingGoogleCalendarEvents}
+            claudeApiKey={claudeApiKey}
+            setClaudeApiKey={setClaudeApiKey}
+            handleSaveClaudeApiKey={handleSaveClaudeApiKey}
+            claudeApiError={claudeApiError}
           />
         );
       default:

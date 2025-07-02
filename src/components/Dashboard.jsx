@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   Calendar,
   CheckSquare,
@@ -7,6 +7,7 @@ import {
   MessageCircle,
   ChevronLeft,
   ChevronRight,
+  Plus,
 } from "lucide-react";
 import DeepnotesEditor from "deepnotes-editor";
 import "deepnotes-editor/dist/deepnotes-editor.css";

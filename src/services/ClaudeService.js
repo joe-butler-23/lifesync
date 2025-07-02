@@ -100,4 +100,5 @@ User question: "${userQuery}"`
   }
 }
 
-export default new ClaudeService();
+const claudeServiceInstance = new ClaudeService();
+export default claudeServiceInstance;

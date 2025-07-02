@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { MessageCircle, Users, Send, Lightbulb, Zap, Brain, ChevronDown, ChevronUp } from 'lucide-react';
+import { Users, Send, Lightbulb, Zap, Brain, ChevronDown, ChevronUp } from 'lucide-react';
 import { useClaudeIntegration } from '../hooks/useClaudeIntegration';
 
 const ClaudeAssistant = () => {

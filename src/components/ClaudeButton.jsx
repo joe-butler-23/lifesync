@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Brain, HelpCircle, X } from 'lucide-react';
+import { Brain, X } from 'lucide-react';
 import { useClaudeIntegration } from '../hooks/useClaudeIntegration';
 
 const ClaudeButton = ({ 

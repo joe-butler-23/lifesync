@@ -629,7 +629,7 @@ const LifeDashboardApp = () => {
     }
   };
 
-  const renderTasksView = () => {
+  const renderTasksViewOld = () => {
     const filteredTasks = getFilteredTasks(
       tasks,
       activeFilters,
@@ -1113,7 +1113,7 @@ const LifeDashboardApp = () => {
 
   // Modal components now imported from separate files
 
-  const renderDashboard = () => {
+  const renderDashboardOld = () => {
     // Helper functions for Day Planner
     const navigateDay = (direction) => {
       const newDate = new Date(selectedDate);
@@ -2524,7 +2524,7 @@ const LifeDashboardApp = () => {
     );
   };
 
-  const renderClaudeAssistant = () => (
+  const renderClaudeAssistantOld = () => (
     <div className="p-6 h-full flex flex-col">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-gray-900">Claude Assistant</h2>
@@ -2614,7 +2614,7 @@ const LifeDashboardApp = () => {
     </div>
   );
 
-  const renderSettings = () => (
+  const renderSettingsOld = () => (
     <div className="p-6">
       <h2 className="text-2xl font-bold text-gray-900 mb-6">Settings</h2>
       <div className="bg-white rounded-xl p-6 shadow-sm border mb-6">
@@ -3097,8 +3097,6 @@ const LifeDashboardApp = () => {
       setScheduledRecipes,
       setScheduledWorkouts,
       handleTaskDrop,
-      mockRecipes,
-      mockWorkouts,
     ],
   );
 

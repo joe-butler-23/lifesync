@@ -1,5 +1,5 @@
-const CLIENT_ID = '730873596773-49ppgpuppetg21jdgcbi02du3v7t8ofa.apps.googleusercontent.com';
-const API_KEY = 'YOUR_API_KEY'; // You'll need to set this
+const CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+const API_KEY = process.env.REACT_APP_GOOGLE_API_KEY;
 const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest';
 const SCOPES = 'https://www.googleapis.com/auth/calendar';
 

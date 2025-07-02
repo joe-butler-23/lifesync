@@ -1,7 +1,6 @@
 import React from 'react';
 import { CheckSquare, Utensils, Dumbbell, MessageCircle, Calendar, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
-import DeepnotesEditor from 'deepnotes-editor';
-import "deepnotes-editor/dist/deepnotes-editor.css";
+import OutlinerEditor from './OutlinerEditor';
 import { mockRecipes, mockWorkouts } from '../constants/mockData';
 
 const Dashboard = ({
@@ -451,8 +450,8 @@ const Dashboard = ({
                 Notes for {formatSelectedDate()}
               </span>
             </div>
-            <div className="min-h-[200px] border-t bg-gray-50">
-              <DeepnotesEditor
+            <div className="h-[300px] border-t">
+              <OutlinerEditor
                 content={scratchpadContent}
                 onChange={setScratchpadContent}
               />

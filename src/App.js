@@ -38,7 +38,8 @@ const LifeDashboardApp = () => {
   const [googleCalendarEvents, setGoogleCalendarEvents] = useState([]);
   const [loadingGoogleCalendarEvents, setLoadingGoogleCalendarEvents] = useState(false);
   const [googleCalendarError, setGoogleCalendarError] = useState(null);
-
+  const [availableProjects, setAvailableProjects] = useState([]); // Initialize availableProjects here
+  const [availableLabels, setAvailableLabels] = useState([]);
   // Week start state - must be declared early since other functions depend on it
   const [currentWeekStart, setCurrentWeekStart] = useState(() => {
     const today = new Date();
@@ -62,7 +63,7 @@ const LifeDashboardApp = () => {
     );
     return getUnscheduledTasks();
   }, [tasks]);
- 
+
   // Wrap fetchGoogleCalendarEvents in useCallback
   const fetchGoogleCalendarEvents = useCallback(async (token) => {
     setLoadingGoogleCalendarEvents(true);
@@ -71,7 +72,7 @@ const LifeDashboardApp = () => {
       const timeMin = new Date(currentWeekStart);
       const timeMax = new Date(currentWeekStart);
       timeMax.setDate(timeMax.getDate() + 7); // Fetch events for the entire week
- 
+
       const fetchedEvents = await GoogleCalendarService.getEvents(token, timeMin, timeMax);
       setGoogleCalendarEvents(fetchedEvents);
       localStorage.setItem('googleCalendarToken', token);
@@ -165,18 +166,19 @@ const LifeDashboardApp = () => {
         };
       });
       setTodoistTasks(formattedTasks);
-      
+
       // Set available projects (only actual projects, no Inbox)
       const projects = fetchedProjects.map(project => ({
         id: project.id,
         name: project.name
       }));
-      
+
       // const labels = [...new Set(formattedTasks.flatMap(task => task.labels))];
-      const [availableProjects, setAvailableProjects] = useState([]);
-      
+
       setAvailableProjects(projects);
-      // setAvailableLabels(labels);
+       const labels = [...new Set(formattedTasks.flatMap(task => task.labels))];
+       setAvailableLabels(labels);
+
       localStorage.setItem('todoistToken', token); // Save token only if fetch is successful
     } catch (error) {
       setTodoistError(error);
@@ -184,13 +186,13 @@ const LifeDashboardApp = () => {
     } finally {
       setLoadingTodoistTasks(false);
     }
-  }, [setLoadingTodoistTasks, setTodoistError, setTodoistTasks, setAvailableProjects]);
+  }, [setLoadingTodoistTasks, setTodoistError, setTodoistTasks, setAvailableProjects, setAvailableLabels]);
 
   useEffect(() => {
     if (todoistToken) {
       fetchTodoistTasks(todoistToken);
     }
-  }, [todoistToken]);
+  }, [todoistToken, fetchTodoistTasks]);
 
   // Google Calendar Integration
   useEffect(() => {
@@ -248,7 +250,7 @@ const LifeDashboardApp = () => {
 
   const [showEditTaskModal, setShowEditTaskModal] = useState(false);
   const [editingTask, setEditingTask] = useState(null); // Stores the task being edited
-  
+
   // Calendar event editing states
   const [showEditEventModal, setShowEditEventModal] = useState(false);
   const [editingEvent, setEditingEvent] = useState(null); // Stores the event being edited
@@ -288,13 +290,13 @@ const LifeDashboardApp = () => {
       task.due.startsWith(dateString) &&
       !task.completed
     );
-    
+
     // Apply custom ordering if it exists
     const order = taskOrder[dateString];
     if (order && order.length > 0) {
       const orderedTasks = [];
       const unorderedTasks = [];
-      
+
       // First, add tasks in the specified order
       order.forEach(taskId => {
         const task = dayTasks.find(t => t.id === taskId);
@@ -302,17 +304,17 @@ const LifeDashboardApp = () => {
           orderedTasks.push(task);
         }
       });
-      
+
       // Then add any tasks that aren't in the order (new tasks)
       dayTasks.forEach(task => {
         if (!order.includes(task.id)) {
           unorderedTasks.push(task);
         }
       });
-      
+
       return [...orderedTasks, ...unorderedTasks];
     }
-    
+
     return dayTasks;
   };
 
@@ -337,7 +339,7 @@ const LifeDashboardApp = () => {
       const dateKey = targetDate.toISOString().split('T')[0];
       setTaskOrder(prevOrder => {
         const newOrderState = { ...prevOrder };
-        
+
         // Remove task from all existing orders (in case it's moving between columns)
         Object.keys(newOrderState).forEach(key => {
           const order = newOrderState[key];
@@ -346,16 +348,16 @@ const LifeDashboardApp = () => {
             newOrderState[key] = order.filter(id => id !== taskId);
           }
         });
-        
+
         // Get current order for target date
         const currentOrder = newOrderState[dateKey] || [];
         const newOrder = [...currentOrder];
-        
+
         // Insert at the new position
         newOrder.splice(insertPosition, 0, taskId);
-        
+
         newOrderState[dateKey] = newOrder;
-        
+
         return newOrderState;
       });
     }
@@ -411,7 +413,7 @@ const LifeDashboardApp = () => {
         priority: newTaskPriority,
         due_string: newTaskDueDate, // Todoist expects 'due_string' for natural language dates
       });
-      
+
       // Format the created task and add it to local state immediately
       const formattedTask = {
         id: createdTask.id,
@@ -422,7 +424,7 @@ const LifeDashboardApp = () => {
         source: 'todoist',
         due: createdTask.due ? (createdTask.due.date || createdTask.due.datetime) : null
       };
-      
+
       setTodoistTasks(prevTasks => [...prevTasks, formattedTask]);
       setNewTaskContent('');
       setNewTaskPriority(1);
@@ -473,7 +475,7 @@ const LifeDashboardApp = () => {
       }
 
       await TodoistService.updateTask(todoistToken, taskId, formattedUpdates);
-      
+
       // Update local state immediately instead of refetching
       setTodoistTasks(prevTasks =>
         prevTasks.map(task =>
@@ -488,7 +490,7 @@ const LifeDashboardApp = () => {
             : task
         )
       );
-      
+
       setEditingTask(null); // Clear editing task state
       setShowEditTaskModal(false); // Close the modal
     } catch (error) {
@@ -672,7 +674,7 @@ const LifeDashboardApp = () => {
           {!loadingTodoistTasks && tasks.length === 0 && !todoistError && (
             <p className="text-gray-600">No tasks found. Add a new task or check your Todoist integration settings.</p>
           )}
-          
+
           {!loadingTodoistTasks && tasks.length > 0 && Object.entries(groupedTasks).map(([groupName, groupTasks]) => (
             <div key={groupName} className="space-y-3">
               {groupBy !== 'none' && (
@@ -683,7 +685,7 @@ const LifeDashboardApp = () => {
                   </span>
                 </div>
               )}
-              
+
               {groupTasks.map(task => (
                 <div key={task.id} className="bg-white rounded-xl p-4 shadow-sm border flex items-center justify-between hover:shadow-md transition-shadow">
                   <div className="flex items-center">
@@ -855,7 +857,7 @@ const LifeDashboardApp = () => {
             {mode === 'natural' ? 'Use Date Picker' : 'Use Natural Language'}
           </button>
         </div>
-        
+
         {mode === 'natural' ? (
           <input
             type="text"
@@ -872,7 +874,7 @@ const LifeDashboardApp = () => {
             onChange={handleDateChange}
           />
         )}
-        
+
         <div className="text-xs text-gray-500">
           {mode === 'natural' 
             ? 'Try: today, tomorrow, next monday, in 2 weeks, 2024-12-31'
@@ -920,7 +922,7 @@ const LifeDashboardApp = () => {
     // Filter tasks based on dayTaskFilter
     const getFilteredDayTasks = () => {
       let filtered = dayTasks;
-      
+
       switch (dayTaskFilter) {
         case 'bridge_club':
           filtered = dayTasks.filter(task => 
@@ -942,7 +944,7 @@ const LifeDashboardApp = () => {
           // No additional filtering needed
           break;
       }
-      
+
       return filtered;
     };
 
@@ -959,7 +961,7 @@ const LifeDashboardApp = () => {
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
-            
+
             <div className="flex items-center space-x-3">
               <h1 className="text-2xl font-bold text-gray-900">{formatSelectedDate()}</h1>
               <button
@@ -970,7 +972,7 @@ const LifeDashboardApp = () => {
                 <Calendar className="w-5 h-5" />
               </button>
             </div>
-            
+
             <button
               onClick={() => navigateDay(1)}
               className="flex items-center px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
@@ -1007,7 +1009,7 @@ const LifeDashboardApp = () => {
                 </h3>
                 <span className="text-sm text-gray-500">{dayWorkouts.length} scheduled</span>
               </div>
-              
+
               <div className="space-y-3 min-h-[120px]">
                 {dayWorkouts.length === 0 ? (
                   <div className="flex items-center justify-center h-24 text-gray-500 bg-gray-50 rounded-lg border-2 border-dashed">
@@ -1048,7 +1050,7 @@ const LifeDashboardApp = () => {
                   {dayRecipes.lunch.length + dayRecipes.dinner.length} planned
                 </span>
               </div>
-              
+
               <div className="space-y-4">
                 {/* Lunch */}
                 <div>
@@ -1164,7 +1166,7 @@ const LifeDashboardApp = () => {
                   Uncategorised ({dayTasks.filter(t => !t.project_name || t.project_name.trim() === '').length})
                 </button>
               </div>
-              
+
               <div className="space-y-3 min-h-[200px] max-h-[300px] overflow-y-auto">
                 {filteredDayTasks.length === 0 ? (
                   <div className="flex items-center justify-center h-24 text-gray-500 bg-gray-50 rounded-lg border-2 border-dashed">
@@ -1223,7 +1225,7 @@ const LifeDashboardApp = () => {
                 </h3>
                 <span className="text-sm text-gray-500">Notes for {formatSelectedDate()}</span>
               </div>
-              
+
               <div className="min-h-[200px] border rounded-lg p-4 bg-gray-50">
                 <DeepnotesEditor
                   content={scratchpadContent}
@@ -1366,7 +1368,7 @@ const LifeDashboardApp = () => {
         const eventDate = new Date(event.start);
         return eventDate.toISOString().split('T')[0] === dateKey;
       });
-      
+
       return (
         <Droppable droppableId={dateKey}>
           {(provided) => (
@@ -1596,6 +1598,12 @@ const LifeDashboardApp = () => {
               return dueDate < startOfCurrentWeek && !task.completed;
             });
 
+            const getUnscheduledTasks = () => tasks.filter(task =>
+              task.source === 'todoist' &&
+              !task.completed &&
+              !task.due && // Only truly unscheduled tasks (no due date)
+              (!task.project_name || task.project_name.toLowerCase() !== 'shopping list')
+            );
             const filteredUnscheduledTasks = getUnscheduledTasks();
 
           return (
@@ -1614,7 +1622,7 @@ const LifeDashboardApp = () => {
                   </div>
                 </div>
               )}
- 
+
                {/* Task Filters */}
                <div className="mb-4">
                  <h3 className="font-semibold text-gray-900 mb-2">Task Filters</h3>
@@ -1653,7 +1661,7 @@ const LifeDashboardApp = () => {
                    </button>
                  </div>
                </div>
- 
+
                <Droppable droppableId="unscheduled">
                  {(provided) => (
                    <div
@@ -1841,12 +1849,12 @@ const LifeDashboardApp = () => {
               </svg>
               Previous Week
             </button>
-            
+
             <div className="text-center">
               <h2 className="text-xl font-semibold text-gray-900">{formatWeekRange(currentWeekStart)}</h2>
               <p className="text-sm text-gray-500">{new Date().getFullYear()}</p>
             </div>
-            
+
             <button
               onClick={() => navigateWeek(1)}
               className="flex items-center px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
@@ -2172,18 +2180,18 @@ const LifeDashboardApp = () => {
         });
         return;
       }
-      
+
       // Handle recipe scheduling (lunch/dinner slots)
       const lastDashIndex = destination.droppableId.lastIndexOf('-');
       const dateString = destination.droppableId.substring(0, lastDashIndex);
       const mealType = destination.droppableId.substring(lastDashIndex + 1);
-      
+
       if (dateString && mealType) {
         const dateKey = new Date(dateString).toISOString().split('T')[0];
         console.log('Scheduling recipe:', draggableId, 'to', dateKey, mealType);
         setScheduledRecipes(prev => {
           const newScheduled = { ...prev };
-          
+
           // Remove from any existing slots first
           Object.keys(newScheduled).forEach(existingDateKey => {
             if (newScheduled[existingDateKey] && typeof newScheduled[existingDateKey] === 'object') {
@@ -2196,16 +2204,15 @@ const LifeDashboardApp = () => {
               });
             }
           });
-          
+
           // Add to new slot
           if (!newScheduled[dateKey]) {
             newScheduled[dateKey] = { lunch: [], dinner: [] };
           }
           if (!newScheduled[dateKey][mealType]) {
             newScheduled[dateKey][mealType] = [];
-          }
-          newScheduled[dateKey][mealType].push(draggableId);
-          
+          }newScheduled[dateKey][mealType].push(draggableId);
+
           console.log('Updated scheduled recipes:', newScheduled);
           return newScheduled;
         });
@@ -2225,25 +2232,25 @@ const LifeDashboardApp = () => {
         });
         return;
       }
-      
+
       // Handle workout scheduling
       try {
         const targetDate = new Date(destination.droppableId);
         const dateKey = targetDate.toISOString().split('T')[0];
         setScheduledWorkouts(prev => {
           const newScheduled = { ...prev };
-          
+
           // Remove from any existing dates first
           Object.keys(newScheduled).forEach(existingDateKey => {
             newScheduled[existingDateKey] = newScheduled[existingDateKey].filter(id => id !== draggableId);
           });
-          
+
           // Add to new date
           if (!newScheduled[dateKey]) {
             newScheduled[dateKey] = [];
           }
           newScheduled[dateKey].push(draggableId);
-          
+
           return newScheduled;
         });
       } catch (error) {
@@ -2277,7 +2284,7 @@ const LifeDashboardApp = () => {
         const lastDashIndex = destination.droppableId.lastIndexOf('-');
         const dateString = destination.droppableId.substring(0, lastDashIndex);
         const mealType = destination.droppableId.substring(lastDashIndex + 1);
-        
+
         if (dateString && (mealType === 'lunch' || mealType === 'dinner')) {
           const dateKey = new Date(dateString).toISOString().split('T')[0];
           setScheduledRecipes(prev => {
@@ -2369,7 +2376,7 @@ const LifeDashboardApp = () => {
     } catch (error) {
       console.error('Error handling task drop:', error);
     }
-  }, [plannerMode, setScheduledRecipes, setScheduledWorkouts, handleTaskDrop]);
+  }, [plannerMode, setScheduledRecipes, setScheduledWorkouts, handleTaskDrop, tasks]);
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>

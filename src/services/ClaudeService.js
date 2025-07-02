@@ -1,0 +1,103 @@
+
+class ClaudeService {
+  constructor() {
+    this.apiKey = process.env.REACT_APP_ANTHROPIC_API_KEY;
+    this.baseURL = 'https://api.anthropic.com/v1/messages';
+  }
+
+  async sendMessage(messages, context = {}, systemPrompt = '') {
+    try {
+      const response = await fetch('/api/claude', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          messages,
+          context,
+          systemPrompt,
+          model: 'claude-3-sonnet-20240229',
+          max_tokens: 2000
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Claude API error: ${response.status}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Claude service error:', error);
+      throw error;
+    }
+  }
+
+  async analyzeAppState(appState, userQuery) {
+    const systemPrompt = `You are an AI assistant deeply integrated with a Life Dashboard app. You can:
+
+1. Read and analyze the complete app state
+2. Suggest actions to take based on user requests
+3. Help with task management, calendar events, meal planning, and workouts
+4. Provide insights about productivity and scheduling
+
+App capabilities:
+- Todoist task management
+- Google Calendar integration  
+- Weekly planning with drag & drop
+- Daily dashboard view
+- Recipe and workout scheduling
+- Scratchpad notes with outliner
+
+Always respond with JSON containing:
+{
+  "response": "Natural language response to user",
+  "actions": [
+    {
+      "type": "ACTION_TYPE",
+      "payload": {...}
+    }
+  ],
+  "insights": ["Optional insights about the user's data"]
+}
+
+Available action types:
+- NAVIGATE: { "view": "dashboard|planner|tasks|claude|settings" }
+- UPDATE_TASK: { "taskId": "id", "updates": {...} }
+- ADD_TASK: { "content": "text", "dueDate": "date", "priority": 1-4 }
+- SCHEDULE_RECIPE: { "recipeId": "id", "date": "YYYY-MM-DD", "mealType": "lunch|dinner" }
+- SCHEDULE_WORKOUT: { "workoutId": "id", "date": "YYYY-MM-DD" }
+- UPDATE_SCRATCHPAD: { "content": "text", "date": "YYYY-MM-DD" }
+- SET_DATE: { "date": "YYYY-MM-DD" }
+- APPLY_FILTER: { "filterType": "tasks|day", "filter": "filter_name" }`;
+
+    const messages = [
+      {
+        role: 'user',
+        content: `Current app state: ${JSON.stringify(appState, null, 2)}
+
+User request: "${userQuery}"`
+      }
+    ];
+
+    return await this.sendMessage(messages, appState, systemPrompt);
+  }
+
+  async getContextualHelp(component, componentState, userQuery) {
+    const systemPrompt = `You are providing contextual help for the ${component} component of a Life Dashboard app. 
+    
+Analyze the component state and provide specific, actionable guidance.`;
+
+    const messages = [
+      {
+        role: 'user',
+        content: `Component: ${component}
+State: ${JSON.stringify(componentState, null, 2)}
+User question: "${userQuery}"`
+      }
+    ];
+
+    return await this.sendMessage(messages, { component, componentState }, systemPrompt);
+  }
+}
+
+export default new ClaudeService();

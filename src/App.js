@@ -16,6 +16,7 @@ import DeepnotesEditor from "deepnotes-editor";
 import "deepnotes-editor/dist/deepnotes-editor.css";
 import TodoistService from "./services/TodoistService";
 import GoogleCalendarService from "./services/GoogleCalendarService";
+import { ClaudeProvider } from "./hooks/useClaudeIntegration";
 
 // Components
 import Sidebar from "./components/common/Sidebar";
@@ -3101,35 +3102,71 @@ const LifeDashboardApp = () => {
     ],
   );
 
+  // Prepare app state and actions for Claude integration
+  const appState = {
+    activeView,
+    selectedDate,
+    tasks,
+    scheduledRecipes,
+    scheduledWorkouts,
+    scratchpadContent,
+    dayTaskFilter,
+    activeFilters,
+    taskFilter,
+    todoistToken,
+    googleCalendarToken,
+    availableProjects,
+    currentWeekStart
+  };
+
+  const appActions = {
+    setActiveView,
+    setSelectedDate,
+    setScratchpadContent,
+    setDayTaskFilter,
+    setActiveFilters,
+    setTaskFilter,
+    setScheduledRecipes,
+    setScheduledWorkouts,
+    handleAddTask,
+    handleEditTask,
+    handleDeleteTask,
+    handleTaskCompletionToggle,
+    fetchTodoistTasks,
+    navigateWeek: navigateWeek
+  };
+
   return (
-    <DragDropContext onDragEnd={onDragEnd}>
-      <div className="flex h-screen bg-gray-100">
-        <Sidebar
-          activeView={activeView}
-          setActiveView={setActiveView}
-          isCollapsed={sidebarCollapsed}
-          setIsCollapsed={setSidebarCollapsed}
-        />
-        <div className="flex-1 overflow-auto">{renderContent()}</div>
-        {showEditTaskModal && editingTask && (
-          <EditTaskModal
-            task={editingTask}
-            onClose={() => setShowEditTaskModal(false)}
-            onSave={handleEditTask}
-            onDelete={handleDeleteTask}
-            availableProjects={availableProjects}
+    <ClaudeProvider appState={appState} appActions={appActions}>
+      <DragDropContext onDragEnd={onDragEnd}>
+        <div className="flex h-screen bg-gray-100">
+          <Sidebar
+            activeView={activeView}
+            setActiveView={setActiveView}
+            isCollapsed={sidebarCollapsed}
+            setIsCollapsed={setSidebarCollapsed}
           />
-        )}
-        {showEditEventModal && editingEvent && (
-          <EditEventModal
-            event={editingEvent}
-            onClose={() => setShowEditEventModal(false)}
-            onSave={handleUpdateCalendarEvent}
-            onDelete={handleDeleteCalendarEvent}
-          />
-        )}
-      </div>
-    </DragDropContext>
+          <div className="flex-1 overflow-auto">{renderContent()}</div>
+          {showEditTaskModal && editingTask && (
+            <EditTaskModal
+              task={editingTask}
+              onClose={() => setShowEditTaskModal(false)}
+              onSave={handleEditTask}
+              onDelete={handleDeleteTask}
+              availableProjects={availableProjects}
+            />
+          )}
+          {showEditEventModal && editingEvent && (
+            <EditEventModal
+              event={editingEvent}
+              onClose={() => setShowEditEventModal(false)}
+              onSave={handleUpdateCalendarEvent}
+              onDelete={handleDeleteCalendarEvent}
+            />
+          )}
+        </div>
+      </DragDropContext>
+    </ClaudeProvider>
   );
 };
 

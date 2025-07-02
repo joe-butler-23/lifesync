@@ -2,15 +2,18 @@ import React, { useState } from "react";
 import {
   Calendar,
   CheckSquare,
+  Utensils,
+  Dumbbell,
   MessageCircle,
   ChevronLeft,
   ChevronRight,
-  Utensils,
-  Dumbbell,
-  Plus,
 } from "lucide-react";
-import OutlinerEditor from "./OutlinerEditor";
+import DeepnotesEditor from "deepnotes-editor";
+import "deepnotes-editor/dist/deepnotes-editor.css";
+import { toDateKey } from "../utils/dateUtils";
 import { mockWorkouts, mockRecipes } from "../constants/mockData";
+import ClaudeButton from "./ClaudeButton";
+import { useClaudeIntegration } from "../hooks/useClaudeIntegration";
 
 const Dashboard = ({
   selectedDate,
@@ -32,7 +35,7 @@ const Dashboard = ({
   editingTask,
   showEditTaskModal,
 }) => {
-  
+
 
   const navigateDay = (direction) => {
     const newDate = new Date(selectedDate);
@@ -113,6 +116,7 @@ const Dashboard = ({
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
+
           <div className="flex items-center space-x-3">
             <h1 className="text-2xl font-bold text-gray-900">
               {formatSelectedDate()}
@@ -124,7 +128,17 @@ const Dashboard = ({
             >
               <Calendar className="w-5 h-5" />
             </button>
+              <ClaudeButton 
+                component="Dashboard"
+                componentState={{
+                  selectedDate: formatSelectedDate(),
+                  tasksCount: filteredDayTasks.length,
+                  workoutsCount: dayWorkouts.length,
+                  mealsPlanned: dayRecipes.lunch.length + dayRecipes.dinner.length
+                }}
+              />
           </div>
+
           <button
             onClick={() => navigateDay(1)}
             className="flex items-center px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
@@ -449,7 +463,7 @@ const Dashboard = ({
               </span>
             </div>
             <div className="min-h-[200px] border-t bg-gray-50">
-              <OutlinerEditor
+              <DeepnotesEditor
                 content={scratchpadContent}
                 onChange={setScratchpadContent}
               />

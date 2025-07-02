@@ -10,7 +10,6 @@ import GoogleCalendarService from './services/GoogleCalendarService';
 import Sidebar from './components/common/Sidebar';
 import EditTaskModal from './components/tasks/EditTaskModal';
 import EditEventModal from './components/events/EditEventModal';
-+import TasksView from './components/TasksView/TasksView'; // Assuming this is where it should be
 
 // Constants and utilities
 import { mockWorkouts, mockRecipes, localTasks, weekDays } from './constants/mockData';

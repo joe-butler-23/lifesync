@@ -392,21 +392,6 @@ const Dashboard = ({
                             {task.content || task.title}
                           </p>
                           <div className="flex items-center space-x-2 text-xs mt-1">
-                            {task.priority && (
-                              <span
-                                className={`px-2 py-1 rounded-full ${
-                                  task.priority === 4
-                                    ? "bg-red-100 text-red-600"
-                                    : task.priority === 3
-                                      ? "bg-yellow-100 text-yellow-600"
-                                      : task.priority === 2
-                                        ? "bg-green-100 text-green-600"
-                                        : "bg-gray-100 text-gray-600"
-                                }`}
-                              >
-                                P{task.priority}
-                              </span>
-                            )}
                             {task.project_name && (
                               <span className="px-2 py-1 bg-blue-100 text-blue-600 rounded-full">
                                 {task.project_name}

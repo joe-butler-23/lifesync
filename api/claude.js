@@ -1,44 +1,31 @@
-
 export default async function handler(req, res) {
-  console.log('Claude API handler called');
-  
+  // Set CORS headers
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-api-key');
+
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
+  }
+
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
-  const { messages, context, systemPrompt, model, max_tokens } = req.body;
-  const apiKey = req.headers['x-api-key'];
-
-  console.log('Request details:', {
-    hasApiKey: !!apiKey,
-    apiKeyPrefix: apiKey ? apiKey.substring(0, 8) + '...' : 'none',
-    messagesLength: messages?.length || 0,
-    model: model
-  });
-
-  if (!apiKey) {
-    console.log('No API key provided');
-    return res.status(401).json({ 
-      error: 'API key required',
-      response: 'Please configure your Claude API key in Settings.',
-      actions: [],
-      insights: []
-    });
-  }
-
-  if (!apiKey.startsWith('sk-ant-')) {
-    console.log('Invalid API key format');
-    return res.status(401).json({ 
-      error: 'Invalid API key format',
-      response: 'Please check your Claude API key format in Settings.',
-      actions: [],
-      insights: []
-    });
+    res.status(405).json({ error: 'Method not allowed' });
+    return;
   }
 
   try {
-    console.log('Making request to Anthropic API...');
-    const anthropicResponse = await fetch('https://api.anthropic.com/v1/messages', {
+    const { messages, context, systemPrompt, model = 'claude-3-sonnet-20240229', max_tokens = 2000 } = req.body;
+    const apiKey = req.headers['x-api-key'];
+
+    if (!apiKey || !apiKey.startsWith('sk-ant-')) {
+      res.status(400).json({ error: { message: 'Valid Claude API key required' } });
+      return;
+    }
+
+    console.log('Forwarding request to Claude API...');
+
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -46,70 +33,48 @@ export default async function handler(req, res) {
         'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify({
-        model: model || 'claude-3-sonnet-20240229',
-        max_tokens: max_tokens || 2000,
-        system: systemPrompt,
-        messages: messages
+        model,
+        max_tokens,
+        system: systemPrompt || 'You are a helpful AI assistant.',
+        messages: messages.map(msg => ({
+          role: msg.role,
+          content: msg.content
+        }))
       })
     });
 
-    console.log('Anthropic API response status:', anthropicResponse.status);
-
-    if (!anthropicResponse.ok) {
-      const errorText = await anthropicResponse.text();
-      console.error('Anthropic API error:', errorText);
-      let errorData;
-      try {
-        errorData = JSON.parse(errorText);
-      } catch {
-        errorData = { error: { message: errorText } };
-      }
-      
-      return res.status(anthropicResponse.status).json({ 
-        error: `Anthropic API error: ${anthropicResponse.status}`,
-        response: `API Error: ${errorData?.error?.message || 'Unknown error'}`,
-        actions: [],
-        insights: []
-      });
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Claude API error:', errorText);
+      res.status(response.status).json({ error: { message: errorText } });
+      return;
     }
 
-    const data = await anthropicResponse.json();
-    console.log('Anthropic API response data keys:', Object.keys(data));
-    
-    if (!data.content || !data.content[0] || !data.content[0].text) {
-      console.error('Invalid response structure from Anthropic:', data);
-      return res.status(500).json({ 
-        error: 'Invalid response from Anthropic',
-        response: 'Received an unexpected response format from the AI service.',
-        actions: [],
-        insights: []
-      });
-    }
+    const data = await response.json();
+    console.log('Claude API response received');
 
-    // Try to parse JSON response from Claude
-    let parsedResponse;
+    // Extract the response content and try to parse as JSON
+    const content = data.content?.[0]?.text || '';
+
     try {
-      parsedResponse = JSON.parse(data.content[0].text);
-      console.log('Successfully parsed JSON response');
-    } catch (parseError) {
-      console.log('Response is not JSON, treating as plain text:', parseError.message);
-      // If not JSON, return as plain text response
-      parsedResponse = {
-        response: data.content[0].text,
+      // Try to parse as JSON first
+      const parsedContent = JSON.parse(content);
+      res.status(200).json(parsedContent);
+    } catch {
+      // If not JSON, return as plain response
+      res.status(200).json({
+        response: content,
         actions: [],
         insights: []
-      };
+      });
     }
 
-    console.log('Sending response to client');
-    res.status(200).json(parsedResponse);
   } catch (error) {
-    console.error('Claude API handler error:', error);
+    console.error('API handler error:', error);
     res.status(500).json({ 
-      error: 'Failed to communicate with Claude',
-      response: 'I apologize, but I encountered an error. Please try again.',
-      actions: [],
-      insights: []
+      error: { 
+        message: `Server error: ${error.message}` 
+      } 
     });
   }
 }

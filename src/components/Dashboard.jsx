@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ChevronRight, ChevronDown, Calendar, Clock, MapPin, AlertCircle, CheckSquare, Edit3, Save, X, Trash2, MoreHorizontal, Filter, Plus } from 'lucide-react';
+import { ChevronRight, ChevronDown, ChevronLeft, Calendar, Clock, MapPin, AlertCircle, CheckSquare, Edit3, Save, X, Trash2, MoreHorizontal, Filter, Plus, Utensils, Dumbbell, MessageCircle } from 'lucide-react';
 import OutlinerEditor from './OutlinerEditor';
 import ClaudeAssistant from './ClaudeAssistant';
+import { mockRecipes, mockWorkouts } from '../constants/mockData';
 
 function Dashboard({
   currentView,
@@ -16,7 +17,9 @@ function Dashboard({
   scheduledRecipes = {},
   setScheduledRecipes,
   scheduledWorkouts = {},
-  setScheduledWorkouts
+  setScheduledWorkouts,
+  selectedDate,
+  setSelectedDate
 }) => {
 
 

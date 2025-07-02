@@ -2721,6 +2721,10 @@ const LifeDashboardApp = () => {
             scratchpadContent={scratchpadContent}
             setScratchpadContent={setScratchpadContent}
             handleTaskCompletionToggle={handleTaskCompletionToggle}
+            scheduledRecipes={scheduledRecipes}
+            scheduledWorkouts={scheduledWorkouts}
+            dayTaskFilter={dayTaskFilter}
+            setDayTaskFilter={setDayTaskFilter}
           />
         );
       case "planner":

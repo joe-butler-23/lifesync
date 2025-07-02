@@ -27,6 +27,8 @@ import {
   toggleFilter 
 } from './utils/taskUtils';
 
+const DEBUG = process.env.NODE_ENV !== 'production';
+
 
 const LifeDashboardApp = () => {
   const [activeView, setActiveView] = useState('dashboard');
@@ -2155,7 +2157,7 @@ const LifeDashboardApp = () => {
     if (plannerMode === 'recipes') {
       if (destination.droppableId === 'unscheduled-recipes') {
         // Dragged back to sidebar - remove from schedule
-        console.log('Removing recipe from schedule:', draggableId);
+        if (DEBUG) console.log('Removing recipe from schedule:', draggableId);
         setScheduledRecipes(prev => {
           const newScheduled = { ...prev };
           Object.keys(newScheduled).forEach(dateKey => {
@@ -2169,7 +2171,7 @@ const LifeDashboardApp = () => {
               });
             }
           });
-          console.log('After removal, scheduled recipes:', newScheduled);
+          if (DEBUG) console.log('After removal, scheduled recipes:', newScheduled);
           return newScheduled;
         });
         return;
@@ -2182,7 +2184,7 @@ const LifeDashboardApp = () => {
 
       if (dateString && mealType) {
         const dateKey = new Date(dateString).toISOString().split('T')[0];
-        console.log('Scheduling recipe:', draggableId, 'to', dateKey, mealType);
+        if (DEBUG) console.log('Scheduling recipe:', draggableId, 'to', dateKey, mealType);
         setScheduledRecipes(prev => {
           const newScheduled = { ...prev };
 
@@ -2207,7 +2209,7 @@ const LifeDashboardApp = () => {
             newScheduled[dateKey][mealType] = [];
           }newScheduled[dateKey][mealType].push(draggableId);
 
-          console.log('Updated scheduled recipes:', newScheduled);
+          if (DEBUG) console.log('Updated scheduled recipes:', newScheduled);
           return newScheduled;
         });
       }

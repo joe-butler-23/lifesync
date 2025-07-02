@@ -5,13 +5,23 @@ export default async function handler(req, res) {
   }
 
   const { messages, context, systemPrompt, model, max_tokens } = req.body;
+  const apiKey = req.headers['x-api-key'];
+
+  if (!apiKey) {
+    return res.status(401).json({ 
+      error: 'API key required',
+      response: 'Please configure your Claude API key in Settings.',
+      actions: [],
+      insights: []
+    });
+  }
 
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': process.env.ANTHROPIC_API_KEY,
+        'x-api-key': apiKey,
         'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify({
@@ -23,7 +33,8 @@ export default async function handler(req, res) {
     });
 
     if (!response.ok) {
-      throw new Error(`Anthropic API error: ${response.status}`);
+      const errorData = await response.json().catch(() => null);
+      throw new Error(`Anthropic API error: ${response.status} - ${errorData?.error?.message || 'Unknown error'}`);
     }
 
     const data = await response.json();

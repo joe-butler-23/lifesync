@@ -16,18 +16,18 @@ class ClaudeService {
     }
 
     try {
-      const response = await fetch(this.baseURL, {
+      const response = await fetch('/api/claude', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-api-key': apiKey,
-          'anthropic-version': '2023-06-01'
+          'x-api-key': apiKey
         },
         body: JSON.stringify({
+          messages: messages,
+          context: context,
+          systemPrompt: systemPrompt,
           model: 'claude-3-sonnet-20240229',
-          max_tokens: 2000,
-          system: systemPrompt,
-          messages: messages
+          max_tokens: 2000
         })
       });
 
@@ -37,21 +37,7 @@ class ClaudeService {
       }
 
       const data = await response.json();
-      
-      // Try to parse JSON response from Claude
-      let parsedResponse;
-      try {
-        parsedResponse = JSON.parse(data.content[0].text);
-      } catch {
-        // If not JSON, return as plain text response
-        parsedResponse = {
-          response: data.content[0].text,
-          actions: [],
-          insights: []
-        };
-      }
-
-      return parsedResponse;
+      return data;
     } catch (error) {
       console.error('Claude service error:', error);
       throw error;

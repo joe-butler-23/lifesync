@@ -12,7 +12,7 @@ const Sidebar = ({ activeView, setActiveView, isCollapsed, setIsCollapsed }) => 
 
   return (
     <div className={`${isCollapsed ? 'w-16' : 'w-64'} bg-white shadow-lg h-full flex flex-col transition-all duration-300`}>
-      <div className="p-6 border-b flex items-center justify-between">
+      <div className={`${isCollapsed ? 'p-3' : 'p-6'} border-b flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'}`}>
         {!isCollapsed && <h1 className="text-xl font-bold text-gray-900">Life Dashboard</h1>}
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}

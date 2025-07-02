@@ -206,8 +206,9 @@ const LifeDashboardApp = () => {
         const formattedTasks = fetchedTasks.map((task) => {
           return {
             id: task.id,
-            title: task.content, // Todoist uses 'content' for task description
+            title: task.content, // Todoist uses 'content' for task title
             content: task.content, // Also keep content for consistency
+            description: task.description || "", // Task description
             completed: task.is_completed || false, // REST API uses 'is_completed'
             priority: task.priority, // Todoist priority (1-4, 4 is highest)
             source: "todoist",

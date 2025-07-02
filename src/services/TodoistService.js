@@ -49,13 +49,23 @@ class TodoistService {
   }
 
   static async updateTask(token, taskId, updates) {
+    // Map our internal field names to Todoist API field names
+    const todoistUpdates = {};
+    
+    if (updates.content !== undefined) todoistUpdates.content = updates.content;
+    if (updates.description !== undefined) todoistUpdates.description = updates.description;
+    if (updates.priority !== undefined) todoistUpdates.priority = updates.priority;
+    if (updates.due !== undefined) todoistUpdates.due_string = updates.due;
+    if (updates.project_id !== undefined) todoistUpdates.project_id = updates.project_id;
+    if (updates.labels !== undefined) todoistUpdates.labels = updates.labels;
+
     const response = await fetch(`${API_BASE_URL}/tasks/${taskId}`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(updates)
+      body: JSON.stringify(todoistUpdates)
     });
 
     if (!response.ok) {

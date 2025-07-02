@@ -745,6 +745,13 @@ const TasksView = (props) => {
                                         >
                                           {task.content || task.title}
                                         </p>
+                                        {task.description && (
+                                          <p
+                                            className={`text-sm mt-1 ${task.completed ? "line-through text-gray-400" : "text-gray-600"}`}
+                                          >
+                                            {task.description}
+                                          </p>
+                                        )}
                                         <div className="flex items-center text-xs text-gray-500 mt-1 space-x-2">
                                           {task.project_name &&
                                             groupBy !== "project" && (

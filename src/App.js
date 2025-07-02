@@ -22,7 +22,7 @@ import Sidebar from "./components/common/Sidebar";
 import EditTaskModal from "./components/tasks/EditTaskModal";
 import EditEventModal from "./components/events/EditEventModal";
 import Dashboard from "./components/Dashboard";
-import WeeklyPlanner from "./components/WeeklyPlanner";
+
 import TasksView from "./components/TasksView";
 import ClaudeAssistant from "./components/ClaudeAssistant";
 import Settings from "./components/Settings";
@@ -2724,14 +2724,7 @@ const LifeDashboardApp = () => {
           />
         );
       case "planner":
-        return (
-          <WeeklyPlanner
-            currentWeekStart={currentWeekStart}
-            navigateWeek={navigateWeek}
-            weekDates={weekDates}
-            getTasksForDate={getTasksForDate}
-          />
-        );
+        return renderWeeklyPlanner();
       case "tasks":
         return (
           <TasksView

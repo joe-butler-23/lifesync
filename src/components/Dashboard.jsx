@@ -450,7 +450,7 @@ const Dashboard = ({
                 Notes for {formatSelectedDate()}
               </span>
             </div>
-            <div className="h-[300px] border-t">
+            <div className="h-[300px] border-t bg-white">
               <OutlinerEditor
                 content={scratchpadContent}
                 onChange={setScratchpadContent}

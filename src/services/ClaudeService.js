@@ -1,31 +1,57 @@
 
 class ClaudeService {
   constructor() {
-    this.apiKey = process.env.REACT_APP_ANTHROPIC_API_KEY;
     this.baseURL = 'https://api.anthropic.com/v1/messages';
   }
 
+  getApiKey() {
+    return localStorage.getItem('claude_api_key') || process.env.REACT_APP_ANTHROPIC_API_KEY;
+  }
+
   async sendMessage(messages, context = {}, systemPrompt = '') {
+    const apiKey = this.getApiKey();
+    
+    if (!apiKey) {
+      throw new Error('Claude API key not configured. Please add your API key in Settings.');
+    }
+
     try {
-      const response = await fetch('/api/claude', {
+      const response = await fetch(this.baseURL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01'
         },
         body: JSON.stringify({
-          messages,
-          context,
-          systemPrompt,
           model: 'claude-3-sonnet-20240229',
-          max_tokens: 2000
+          max_tokens: 2000,
+          system: systemPrompt,
+          messages: messages
         })
       });
 
       if (!response.ok) {
-        throw new Error(`Claude API error: ${response.status}`);
+        const errorData = await response.json().catch(() => null);
+        throw new Error(`Claude API error: ${response.status} - ${errorData?.error?.message || 'Unknown error'}`);
       }
 
-      return await response.json();
+      const data = await response.json();
+      
+      // Try to parse JSON response from Claude
+      let parsedResponse;
+      try {
+        parsedResponse = JSON.parse(data.content[0].text);
+      } catch {
+        // If not JSON, return as plain text response
+        parsedResponse = {
+          response: data.content[0].text,
+          actions: [],
+          insights: []
+        };
+      }
+
+      return parsedResponse;
     } catch (error) {
       console.error('Claude service error:', error);
       throw error;

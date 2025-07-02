@@ -720,6 +720,7 @@ const TasksView = (props) => {
                                     className="bg-white rounded-xl p-4 shadow-sm border flex items-center justify-between hover:shadow-md transition-shadow cursor-pointer"
                                     onClick={() => {
                                       if (task.source === "todoist") {
+                                        console.log("Clicking task in TasksView:", task.id);
                                         setEditingTask(task);
                                         setShowEditTaskModal(true);
                                       }

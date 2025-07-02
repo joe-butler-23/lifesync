@@ -387,9 +387,12 @@ const Dashboard = ({
                     key={task.id}
                     className="p-3 bg-blue-50 rounded-lg border border-blue-200 cursor-pointer hover:bg-blue-100 transition-colors"
                     onClick={() => {
-                      if (task.source === "todoist" && setEditingTask && setShowEditTaskModal) {
-                        setEditingTask(task);
-                        setShowEditTaskModal(true);
+                      if (task.source === "todoist") {
+                        console.log("Clicking task:", task.id, "setEditingTask exists:", !!setEditingTask);
+                        if (setEditingTask && setShowEditTaskModal) {
+                          setEditingTask(task);
+                          setShowEditTaskModal(true);
+                        }
                       }
                     }}
                   >

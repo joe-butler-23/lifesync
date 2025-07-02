@@ -2678,6 +2678,8 @@ const LifeDashboardApp = () => {
             setShowAddTaskModal={setShowAddTaskModal}
             setEditingTask={setEditingTask}
             setShowEditTaskModal={setShowEditTaskModal}
+            editingTask={editingTask}
+            showEditTaskModal={showEditTaskModal}
           />
         );
       case "planner":

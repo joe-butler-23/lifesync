@@ -433,39 +433,48 @@ const Dashboard = ({
                 Notes for {formatSelectedDate()}
               </span>
             </div>
-            <div className="min-h-[200px] border rounded-lg p-4 bg-gray-50 relative">
-              <button
-                className="absolute top-2 right-2 px-2 py-1 text-xs bg-white border rounded hover:bg-gray-100 z-10"
-                onClick={() => {
-                  // Reset zoom by triggering escape key or clicking outside
-                  const editorElement = document.querySelector('.deepnotes-editor');
-                  if (editorElement) {
-                    const escapeEvent = new KeyboardEvent('keydown', {
-                      key: 'Escape',
-                      keyCode: 27,
-                      which: 27,
-                      bubbles: true
-                    });
-                    editorElement.dispatchEvent(escapeEvent);
-                  }
-                }}
-                title="Zoom out / Reset view"
-              >
-                Zoom Out
-              </button>
-              <DeepnotesEditor
-                content={scratchpadContent}
-                onChange={setScratchpadContent}
-                placeholder="Start typing your notes, ideas, or reminders..."
-                className="min-h-[160px] w-full border-none bg-transparent focus:outline-none"
-                style={{
-                  lineHeight: "normal",
-                  display: "flex",
-                  alignItems: "center",
-                }}
-                toolbar={true}
-                showToolbar={true}
-              />
+            <div className="min-h-[200px] border rounded-lg bg-gray-50">
+              {/* Breadcrumb Navigation */}
+              <div className="flex items-center px-3 py-2 bg-gray-100 border-b text-xs text-gray-600">
+                <button 
+                  onClick={() => {
+                    const editorElement = document.querySelector('.deepnotes-editor');
+                    if (editorElement) {
+                      const escapeEvent = new KeyboardEvent('keydown', {
+                        key: 'Escape',
+                        keyCode: 27,
+                        which: 27,
+                        bubbles: true
+                      });
+                      editorElement.dispatchEvent(escapeEvent);
+                    }
+                  }}
+                  className="hover:text-blue-600 hover:underline"
+                >
+                  📋 Scratchpad
+                </button>
+                <span className="mx-2">›</span>
+                <span className="text-gray-500">Notes</span>
+                <div className="ml-auto text-gray-400">
+                  Press ESC to zoom out
+                </div>
+              </div>
+              
+              <div className="p-4">
+                <DeepnotesEditor
+                  content={scratchpadContent}
+                  onChange={setScratchpadContent}
+                  placeholder="Start typing your notes, ideas, or reminders..."
+                  className="min-h-[160px] w-full border-none bg-transparent focus:outline-none"
+                  style={{
+                    lineHeight: "normal",
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                  toolbar={true}
+                  showToolbar={true}
+                />
+              </div>
             </div>
           </div>
         </div>

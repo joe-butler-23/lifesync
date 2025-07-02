@@ -12,7 +12,7 @@ import EditTaskModal from './components/tasks/EditTaskModal';
 import EditEventModal from './components/events/EditEventModal';
 
 // Constants and utilities
-import { mockWorkouts, mockRecipes, localTasks, weekDays } from './constants/mockData';
+import { mockWorkouts, mockRecipes, localTasks } from './constants/mockData';
 import { 
   getWeekDates, 
   formatWeekRange, 
@@ -39,7 +39,6 @@ const LifeDashboardApp = () => {
   const [loadingGoogleCalendarEvents, setLoadingGoogleCalendarEvents] = useState(false);
   const [googleCalendarError, setGoogleCalendarError] = useState(null);
   const [availableProjects, setAvailableProjects] = useState([]); // Initialize availableProjects here
-  const [availableLabels, setAvailableLabels] = useState([]);
   // Week start state - must be declared early since other functions depend on it
   const [currentWeekStart, setCurrentWeekStart] = useState(() => {
     const today = new Date();
@@ -48,7 +47,7 @@ const LifeDashboardApp = () => {
     return new Date(today.setDate(diff));
   });
 
-  const tasks = React.useMemo(() => [...localTasks, ...todoistTasks], [localTasks, todoistTasks]); // Combine local and Todoist tasks
+  const tasks = React.useMemo(() => [...localTasks, ...todoistTasks], [todoistTasks]); // Combine local and Todoist tasks
 
   // Memoized weekDates and unscheduledTasks for Weekly Planner
   const weekDates = React.useMemo(() => getWeekDates(currentWeekStart), [currentWeekStart]);
@@ -173,11 +172,7 @@ const LifeDashboardApp = () => {
         name: project.name
       }));
 
-      // const labels = [...new Set(formattedTasks.flatMap(task => task.labels))];
-
       setAvailableProjects(projects);
-       const labels = [...new Set(formattedTasks.flatMap(task => task.labels))];
-       setAvailableLabels(labels);
 
       localStorage.setItem('todoistToken', token); // Save token only if fetch is successful
     } catch (error) {
@@ -186,7 +181,7 @@ const LifeDashboardApp = () => {
     } finally {
       setLoadingTodoistTasks(false);
     }
-  }, [setLoadingTodoistTasks, setTodoistError, setTodoistTasks, setAvailableProjects, setAvailableLabels]);
+  }, [setLoadingTodoistTasks, setTodoistError, setTodoistTasks, setAvailableProjects]);
 
   useEffect(() => {
     if (todoistToken) {
@@ -393,10 +388,7 @@ const LifeDashboardApp = () => {
 
   // Simplified drag handlers using HTML5 drag API
 
-  // Use extracted utility functions
-  const filteredTasks = getFilteredTasks(tasks, activeFilters, selectedProjects);
-  const sortedTasks = getSortedTasks(filteredTasks, sortBy);
-  const groupedTasks = getGroupedTasks(sortedTasks, groupBy);
+  // Use extracted utility functions for tasks view only
 
   const handleAddTask = async () => {
     if (!todoistToken) {
@@ -1607,7 +1599,6 @@ const LifeDashboardApp = () => {
               !task.due && // Only truly unscheduled tasks (no due date)
               (!task.project_name || task.project_name.toLowerCase() !== 'shopping list')
             );
-            const filteredUnscheduledTasks = getUnscheduledTasks();
 
           return (
             <div className="w-80 bg-white rounded-xl p-4 shadow-sm border">
@@ -2374,7 +2365,7 @@ const LifeDashboardApp = () => {
     } catch (error) {
       console.error('Error handling task drop:', error);
     }
-  }, [plannerMode, setScheduledRecipes, setScheduledWorkouts, handleTaskDrop, tasks]);
+  }, [plannerMode, setScheduledRecipes, setScheduledWorkouts, handleTaskDrop]);
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>

@@ -32,9 +32,6 @@ const Dashboard = ({
   editingTask,
   showEditTaskModal,
 }) => {
-  const [scratchpadContent, setScratchpadContent] = useState(
-    localStorage.getItem(`scratchpad-${selectedDate?.toLocaleDateString()}`) || "",
-  );
   const [isFullScreenScratchpad, setIsFullScreenScratchpad] = useState(false);
 
   const navigateDay = (direction) => {

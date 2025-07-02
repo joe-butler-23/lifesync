@@ -2799,9 +2799,14 @@ const LifeDashboardApp = () => {
 
   const onDragEnd = React.useCallback(
     (result) => {
-      const { destination, draggableId } = result;
+      const { destination, draggableId, source } = result;
 
       if (!destination) {
+        return;
+      }
+
+      // If dropped in the same position, do nothing
+      if (destination.droppableId === source.droppableId && destination.index === source.index) {
         return;
       }
 
@@ -2833,13 +2838,12 @@ const LifeDashboardApp = () => {
           return;
         }
 
-        // Handle recipe scheduling (lunch/dinner slots)
-        const lastDashIndex = destination.droppableId.lastIndexOf("-");
-        const dateString = destination.droppableId.substring(0, lastDashIndex);
-        const mealType = destination.droppableId.substring(lastDashIndex + 1);
+        // Handle recipe scheduling - expect format like "2025-01-01-lunch"
+        const parts = destination.droppableId.split("-");
+        if (parts.length >= 4) {
+          const dateKey = `${parts[0]}-${parts[1]}-${parts[2]}`;
+          const mealType = parts[3];
 
-        if (dateString && mealType) {
-          const dateKey = new Date(dateString).toISOString().split("T")[0];
           if (DEBUG)
             console.log(
               "Scheduling recipe:",
@@ -2848,10 +2852,11 @@ const LifeDashboardApp = () => {
               dateKey,
               mealType,
             );
+
           setScheduledRecipes((prev) => {
             const newScheduled = { ...prev };
 
-            // Remove from any existing slots first
+            // Remove from any existing dates/meals first
             Object.keys(newScheduled).forEach((existingDateKey) => {
               if (
                 newScheduled[existingDateKey] &&
@@ -2859,11 +2864,7 @@ const LifeDashboardApp = () => {
               ) {
                 Object.keys(newScheduled[existingDateKey]).forEach(
                   (existingMealType) => {
-                    if (
-                      Array.isArray(
-                        newScheduled[existingDateKey][existingMealType],
-                      )
-                    ) {
+                    if (Array.isArray(newScheduled[existingDateKey][existingMealType])) {
                       newScheduled[existingDateKey][existingMealType] =
                         newScheduled[existingDateKey][existingMealType].filter(
                           (id) => id !== draggableId,
@@ -2874,20 +2875,31 @@ const LifeDashboardApp = () => {
               }
             });
 
-            // Add to new slot
+            // Add to new date/meal at the specific index
             if (!newScheduled[dateKey]) {
               newScheduled[dateKey] = { lunch: [], dinner: [] };
             }
             if (!newScheduled[dateKey][mealType]) {
               newScheduled[dateKey][mealType] = [];
             }
-            newScheduled[dateKey][mealType].push(draggableId);
 
-            if (DEBUG) console.log("Updated scheduled recipes:", newScheduled);
+            // Insert at the specific index instead of just pushing
+            const targetArray = [...newScheduled[dateKey][mealType]];
+            targetArray.splice(destination.index, 0, draggableId);
+            newScheduled[dateKey][mealType] = targetArray;
+
+            if (DEBUG)
+              console.log("Updated scheduled recipes:", newScheduled);
             return newScheduled;
           });
+          return;
+        } else {
+          console.error(
+            "Invalid droppable ID format for recipes:",
+            destination.droppableId,
+          );
+          return;
         }
-        return;
       }
 
       if (plannerMode === "workouts") {
@@ -2905,8 +2917,17 @@ const LifeDashboardApp = () => {
           return;
         }
 
-        // Handle workout scheduling - droppableId is already the date key
-        const dateKey = destination.droppableId;
+        // Handle workout scheduling - droppableId should be the date key
+        let dateKey = destination.droppableId;
+
+        // Handle the case where the droppableId includes "-workouts" suffix
+        if (dateKey.endsWith("-workouts")) {
+          const parts = dateKey.split("-");
+          if (parts.length >= 4) {
+            dateKey = `${parts[0]}-${parts[1]}-${parts[2]}`;
+          }
+        }
+
         setScheduledWorkouts((prev) => {
           const newScheduled = { ...prev };
 
@@ -2917,11 +2938,14 @@ const LifeDashboardApp = () => {
             ].filter((id) => id !== draggableId);
           });
 
-          // Add to new date
+          // Add to new date at the specific index
           if (!newScheduled[dateKey]) {
             newScheduled[dateKey] = [];
           }
-          newScheduled[dateKey].push(draggableId);
+
+          const targetArray = [...newScheduled[dateKey]];
+          targetArray.splice(destination.index, 0, draggableId);
+          newScheduled[dateKey] = targetArray;
 
           return newScheduled;
         });
@@ -2929,11 +2953,13 @@ const LifeDashboardApp = () => {
       }
 
       if (plannerMode === "all") {
-        // Handle drops in 'all' mode
-        if (draggableId.startsWith("r")) {
-          // It's a recipe
-          if (destination.droppableId === "unscheduled-all") {
-            // Dragged back to sidebar - remove from schedule
+        // Handle different droppable types in "all" mode
+        if (destination.droppableId === "unscheduled-all") {
+          // Dragged back to sidebar - remove from all schedules
+          const isRecipe = mockRecipes.some((r) => r.id === draggableId);
+          const isWorkout = mockWorkouts.some((w) => w.id === draggableId);
+
+          if (isRecipe) {
             setScheduledRecipes((prev) => {
               const newScheduled = { ...prev };
               Object.keys(newScheduled).forEach((dateKey) => {
@@ -2952,55 +2978,7 @@ const LifeDashboardApp = () => {
               });
               return newScheduled;
             });
-            return;
-          }
-          const lastDashIndex = destination.droppableId.lastIndexOf("-");
-          const dateString = destination.droppableId.substring(
-            0,
-            lastDashIndex,
-          );
-          const mealType = destination.droppableId.substring(lastDashIndex + 1);
-
-          if (dateString && (mealType === "lunch" || mealType === "dinner")) {
-            const dateKey = new Date(dateString).toISOString().split("T")[0];
-            setScheduledRecipes((prev) => {
-              const newScheduled = { ...prev };
-              Object.keys(newScheduled).forEach((existingDateKey) => {
-                if (
-                  newScheduled[existingDateKey] &&
-                  typeof newScheduled[existingDateKey] === "object"
-                ) {
-                  Object.keys(newScheduled[existingDateKey]).forEach(
-                    (existingMealType) => {
-                      if (
-                        Array.isArray(
-                          newScheduled[existingDateKey][existingMealType],
-                        )
-                      ) {
-                        newScheduled[existingDateKey][existingMealType] =
-                          newScheduled[existingDateKey][
-                            existingMealType
-                          ].filter((id) => id !== draggableId);
-                      }
-                    },
-                  );
-                }
-              });
-              if (!newScheduled[dateKey]) {
-                newScheduled[dateKey] = { lunch: [], dinner: [] };
-              }
-              if (!newScheduled[dateKey][mealType]) {
-                newScheduled[dateKey][mealType] = [];
-              }
-              newScheduled[dateKey][mealType].push(draggableId);
-              return newScheduled;
-            });
-          }
-          return;
-        } else if (draggableId.startsWith("w")) {
-          // It's a workout
-          if (destination.droppableId === "unscheduled-all") {
-            // Dragged back to sidebar - remove from schedule
+          } else if (isWorkout) {
             setScheduledWorkouts((prev) => {
               const newScheduled = { ...prev };
               Object.keys(newScheduled).forEach((dateKey) => {
@@ -3010,49 +2988,89 @@ const LifeDashboardApp = () => {
               });
               return newScheduled;
             });
-            return;
-          }
-          try {
-            const targetDate = new Date(destination.droppableId.split("-")[0]); // Get date part only
-            const dateKey = targetDate.toISOString().split("T")[0];
-            setScheduledWorkouts((prev) => {
-              const newScheduled = { ...prev };
-              Object.keys(newScheduled).forEach((existingDateKey) => {
-                newScheduled[existingDateKey] = newScheduled[
-                  existingDateKey
-                ].filter((id) => id !== draggableId);
-              });
-              if (!newScheduled[dateKey]) {
-                newScheduled[dateKey] = [];
-              }
-              newScheduled[dateKey].push(draggableId);
-              return newScheduled;
-            });
-          } catch (error) {
-            console.error(
-              "Invalid date for workout scheduling in all mode:",
-              destination.droppableId,
-            );
+          } else {
+            // It's a task
+            handleTaskDrop(draggableId, null, destination.index);
           }
           return;
+        }
+
+        // Handle drops to specific day containers with meal types or workouts
+        const parts = destination.droppableId.split("-");
+        if (parts.length >= 4 && (parts[3] === "lunch" || parts[3] === "dinner")) {
+          // Recipe drop with meal type (e.g., "2025-01-01-lunch")
+          const dateKey = `${parts[0]}-${parts[1]}-${parts[2]}`;
+          const mealType = parts[3];
+
+          setScheduledRecipes((prev) => {
+            const newScheduled = { ...prev };
+            // Remove from existing locations
+            Object.keys(newScheduled).forEach((existingDateKey) => {
+              if (
+                newScheduled[existingDateKey] &&
+                typeof newScheduled[existingDateKey] === "object"
+              ) {
+                Object.keys(newScheduled[existingDateKey]).forEach(
+                  (existingMealType) => {
+                    if (Array.isArray(newScheduled[existingDateKey][existingMealType])) {
+                      newScheduled[existingDateKey][existingMealType] =
+                        newScheduled[existingDateKey][existingMealType].filter(
+                          (id) => id !== draggableId,
+                        );
+                    }
+                  },
+                );
+              }
+            });
+            // Add to new location at specific index
+            if (!newScheduled[dateKey]) {
+              newScheduled[dateKey] = { lunch: [], dinner: [] };
+            }
+            if (!newScheduled[dateKey][mealType]) {
+              newScheduled[dateKey][mealType] = [];
+            }
+
+            const targetArray = [...newScheduled[dateKey][mealType]];
+            targetArray.splice(destination.index, 0, draggableId);
+            newScheduled[dateKey][mealType] = targetArray;
+            return newScheduled;
+          });
+        } else if (parts.length >= 4 && parts[3] === "workouts") {
+          // Workout drop (e.g., "2025-01-01-workouts")
+          const dateKey = `${parts[0]}-${parts[1]}-${parts[2]}`;
+
+          setScheduledWorkouts((prev) => {
+            const newScheduled = { ...prev };
+            // Remove from existing locations
+            Object.keys(newScheduled).forEach((existingDateKey) => {
+              newScheduled[existingDateKey] = newScheduled[
+                existingDateKey
+              ].filter((id) => id !== draggableId);
+            });
+            // Add to new location at specific index
+            if (!newScheduled[dateKey]) {
+              newScheduled[dateKey] = [];
+            }
+
+            const targetArray = [...newScheduled[dateKey]];
+            targetArray.splice(destination.index, 0, draggableId);
+            newScheduled[dateKey] = targetArray;
+            return newScheduled;
+          });
         } else {
-          // It's a task
-          if (destination.droppableId === "unscheduled-all") {
-            handleTaskDrop(draggableId, null, destination.index);
-            return;
-          }
           try {
-            const destDate = new Date(destination.droppableId.split("-")[0]); // Get date part only
+            // Task drop to a date
+            const destDate = new Date(destination.droppableId);
             if (isNaN(destDate.getTime())) {
               console.error(
-                "Invalid date for task scheduling in all mode:",
+                "Invalid date for task scheduling:",
                 destination.droppableId,
               );
               return;
             }
             handleTaskDrop(draggableId, destDate, destination.index);
           } catch (error) {
-            console.error("Error handling task drop in all mode:", error);
+            console.error("Error handling task drop:", error);
           }
           return;
         }
@@ -3078,8 +3096,7 @@ const LifeDashboardApp = () => {
         console.error("Error handling task drop:", error);
       }
     },
-    [plannerMode, setScheduledRecipes, setScheduledWorkouts, handleTaskDrop],
-  );
+    [plannerMode, setScheduledRecipes, setScheduledWorkouts, handleTaskDrop, mockRecipes, mockWorkouts]);
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>

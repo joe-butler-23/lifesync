@@ -2675,6 +2675,9 @@ const LifeDashboardApp = () => {
             scheduledWorkouts={scheduledWorkouts}
             dayTaskFilter={dayTaskFilter}
             setDayTaskFilter={setDayTaskFilter}
+            setShowAddTaskModal={setShowAddTaskModal}
+            setEditingTask={setEditingTask}
+            setShowEditTaskModal={setShowEditTaskModal}
           />
         );
       case "planner":

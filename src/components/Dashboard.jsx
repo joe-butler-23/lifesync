@@ -8,9 +8,9 @@ import {
   ChevronRight,
   Utensils,
   Dumbbell,
+  Plus,
 } from "lucide-react";
-import DeepnotesEditor from "deepnotes-editor";
-import "deepnotes-editor/dist/deepnotes-editor.css";
+import OutlinerEditor from "./OutlinerEditor";
 import { mockWorkouts, mockRecipes } from "../constants/mockData";
 
 const Dashboard = ({
@@ -27,6 +27,9 @@ const Dashboard = ({
   scheduledWorkouts = {},
   dayTaskFilter = "all",
   setDayTaskFilter,
+  setShowAddTaskModal,
+  setEditingTask,
+  setShowEditTaskModal,
 }) => {
   const navigateDay = (direction) => {
     const newDate = new Date(selectedDate);
@@ -288,9 +291,18 @@ const Dashboard = ({
                 <CheckSquare className="w-5 h-5 mr-2 text-blue-600" />
                 Tasks
               </h3>
-              <span className="text-sm text-gray-500">
-                {filteredDayTasks.length} tasks
-              </span>
+              <div className="flex items-center space-x-2">
+                <span className="text-sm text-gray-500">
+                  {filteredDayTasks.length} tasks
+                </span>
+                <button
+                  onClick={() => setShowAddTaskModal && setShowAddTaskModal(true)}
+                  className="p-1 rounded-full hover:bg-gray-200 text-blue-600"
+                  title="Add Task"
+                >
+                  <Plus className="w-4 h-4" />
+                </button>
+              </div>
             </div>
 
             {/* Task Filter Buttons */}
@@ -373,7 +385,13 @@ const Dashboard = ({
                 filteredDayTasks.map((task) => (
                   <div
                     key={task.id}
-                    className="p-3 bg-blue-50 rounded-lg border border-blue-200"
+                    className="p-3 bg-blue-50 rounded-lg border border-blue-200 cursor-pointer hover:bg-blue-100 transition-colors"
+                    onClick={() => {
+                      if (task.source === "todoist" && setEditingTask && setShowEditTaskModal) {
+                        setEditingTask(task);
+                        setShowEditTaskModal(true);
+                      }
+                    }}
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex items-start">
@@ -381,9 +399,10 @@ const Dashboard = ({
                           type="checkbox"
                           className="mr-3 mt-1 rounded"
                           checked={task.completed}
-                          onChange={() =>
-                            handleTaskCompletionToggle(task.id, task.completed)
-                          }
+                          onChange={(e) => {
+                            e.stopPropagation();
+                            handleTaskCompletionToggle(task.id, task.completed);
+                          }}
                         />
                         <div>
                           <p
@@ -391,6 +410,11 @@ const Dashboard = ({
                           >
                             {task.content || task.title}
                           </p>
+                          {task.description && (
+                            <p className="text-xs text-blue-700 mt-1 opacity-75">
+                              {task.description}
+                            </p>
+                          )}
                           <div className="flex items-center space-x-2 text-xs mt-1">
                             {task.project_name && (
                               <span className="px-2 py-1 bg-blue-100 text-blue-600 rounded-full">
@@ -408,8 +432,8 @@ const Dashboard = ({
           </div>
 
           {/* Scratchpad */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border">
-            <div className="flex items-center justify-between mb-4">
+          <div className="bg-white rounded-xl shadow-sm border">
+            <div className="flex items-center justify-between p-6 pb-4">
               <h3 className="font-semibold text-gray-900 flex items-center">
                 <MessageCircle className="w-5 h-5 mr-2 text-purple-600" />
                 Scratchpad
@@ -418,48 +442,11 @@ const Dashboard = ({
                 Notes for {formatSelectedDate()}
               </span>
             </div>
-            <div className="min-h-[200px] border rounded-lg bg-gray-50">
-              {/* Breadcrumb Navigation */}
-              <div className="flex items-center px-3 py-2 bg-gray-100 border-b text-xs text-gray-600">
-                <button 
-                  onClick={() => {
-                    const editorElement = document.querySelector('.deepnotes-editor');
-                    if (editorElement) {
-                      const escapeEvent = new KeyboardEvent('keydown', {
-                        key: 'Escape',
-                        keyCode: 27,
-                        which: 27,
-                        bubbles: true
-                      });
-                      editorElement.dispatchEvent(escapeEvent);
-                    }
-                  }}
-                  className="hover:text-blue-600 hover:underline"
-                >
-                  📋 Scratchpad
-                </button>
-                <span className="mx-2">›</span>
-                <span className="text-gray-500">Notes</span>
-                <div className="ml-auto text-gray-400">
-                  Press ESC to zoom out
-                </div>
-              </div>
-              
-              <div className="p-4">
-                <DeepnotesEditor
-                  content={scratchpadContent}
-                  onChange={setScratchpadContent}
-                  placeholder="Start typing your notes, ideas, or reminders..."
-                  className="min-h-[160px] w-full border-none bg-transparent focus:outline-none"
-                  style={{
-                    lineHeight: "normal",
-                    display: "flex",
-                    alignItems: "center",
-                  }}
-                  toolbar={true}
-                  showToolbar={true}
-                />
-              </div>
+            <div className="min-h-[200px] border-t bg-gray-50">
+              <OutlinerEditor
+                content={scratchpadContent}
+                onChange={setScratchpadContent}
+              />
             </div>
           </div>
         </div>

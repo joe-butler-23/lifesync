@@ -122,12 +122,15 @@ export const getUnscheduledTasks = (tasks, taskFilter) => {
       filteredTasks = filteredTasks.filter(task => 
         task.project_name && task.project_name.toLowerCase().includes('bridge club')
       );
+      break;
     case 'home':
       filteredTasks = filteredTasks.filter(task => 
         task.project_name && task.project_name.toLowerCase() === 'home'
       );
+      break;
     case 'urgent':
       filteredTasks = filteredTasks.filter(task => task.priority === 4);
+      break;
     case 'all':
     default:
       break;

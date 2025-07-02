@@ -1,5 +1,5 @@
 import React from 'react';
-import { Calendar, CheckSquare, Utensils, Dumbbell, MessageCircle, Settings, BarChart3 } from 'lucide-react';
+import { Calendar, CheckSquare, MessageCircle, Settings, BarChart3 } from 'lucide-react';
 
 const Sidebar = ({ activeView, setActiveView }) => {
   const menuItems = [

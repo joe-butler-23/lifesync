@@ -20,7 +20,7 @@ function Dashboard({
   setScheduledWorkouts,
   selectedDate,
   setSelectedDate
-}) => {
+}) {
 
 
   const navigateDay = (direction) => {
@@ -48,6 +48,9 @@ function Dashboard({
     });
   };
 
+  // Filter tasks based on dayTaskFilter
+  const [dayTaskFilter, setDayTaskFilter] = useState('all');
+
   // Get data for selected date
   const selectedDateKey = selectedDate.toISOString().split("T")[0];
   const dayTasks = getTasksForDate(selectedDate);
@@ -56,9 +59,6 @@ function Dashboard({
     dinner: [],
   };
   const dayWorkouts = scheduledWorkouts[selectedDateKey] || [];
-
-  // Filter tasks based on dayTaskFilter
-  const [dayTaskFilter, setDayTaskFilter] = useState('all');
 
   const getFilteredDayTasks = () => {
     let filtered = dayTasks;

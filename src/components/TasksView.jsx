@@ -209,215 +209,250 @@ const TasksView = (props) => {
         </div>
       </div>
 
-      {/* Modern Filter Toolbar */}
-      <div className="bg-white rounded-xl border shadow-sm mb-6 overflow-hidden">
-        {/* Main Toolbar */}
-        <div className="p-4 border-b border-gray-100">
-          <div className="flex items-center justify-between gap-4">
-            {/* Left: Search and Quick Filters */}
-            <div className="flex-1 flex items-center gap-3">
-              {/* Search Box */}
-              <div className="relative min-w-64">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <input
-                  type="text"
-                  placeholder="Search tasks..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-                {searchQuery && (
-                  <button
-                    onClick={() => setSearchQuery("")}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                )}
-              </div>
-
-              {/* Quick Filter Pills */}
-              <div className="flex items-center gap-2 overflow-x-auto">
-                {quickFilters.map((filter) => {
-                  const Icon = filter.icon;
-                  const isActive = activeFilters.has(filter.key);
-                  return (
-                    <button
-                      key={filter.key}
-                      onClick={(e) =>
-                        toggleFilter(
-                          filter.key,
-                          activeFilters,
-                          setActiveFilters,
-                          setSelectedProjects,
-                          e,
-                        )
-                      }
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all whitespace-nowrap ${
-                        isActive
-                          ? "bg-blue-100 text-blue-700 border border-blue-200 shadow-sm"
-                          : "bg-gray-50 text-gray-600 hover:bg-gray-100 border border-transparent"
-                      }`}
-                    >
-                      <Icon className="w-3.5 h-3.5" />
-                      {filter.label}
-                      <span
-                        className={`ml-1 px-1.5 py-0.5 rounded text-xs ${
-                          isActive
-                            ? "bg-blue-200 text-blue-800"
-                            : "bg-gray-200 text-gray-500"
-                        }`}
-                      >
-                        {filter.count}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
+      {/* Simple Filter Interface */}
+      <div className="bg-white rounded-xl border shadow-sm mb-6">
+        {/* Always Visible Top Bar */}
+        <div className="p-4">
+          <div className="flex items-center gap-4 mb-4">
+            {/* Search Box */}
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <input
+                type="text"
+                placeholder="Search tasks..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
             </div>
 
-            {/* Right: Sort, Group, Advanced Filters */}
+            {/* Quick Sort & Group */}
             <div className="flex items-center gap-2">
-              {/* Sort Dropdown */}
-              <div className="relative">
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                  className="appearance-none bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
-                >
-                  <option value="default">Default Order</option>
-                  <option value="date">Due Date</option>
-                  <option value="priority">Priority</option>
-                  <option value="alphabetical">Alphabetical</option>
-                </select>
-                <SortAsc className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-              </div>
-
-              {/* Group Dropdown */}
-              <div className="relative">
-                <select
-                  value={groupBy}
-                  onChange={(e) => setGroupBy(e.target.value)}
-                  className="appearance-none bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
-                >
-                  <option value="none">No Grouping</option>
-                  <option value="date">By Due Date</option>
-                  <option value="priority">By Priority</option>
-                  <option value="project">By Project</option>
-                  <option value="label">By Label</option>
-                </select>
-                <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-              </div>
-
-              {/* Advanced Filters Toggle */}
-              <button
-                onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  showAdvancedFilters ||
-                  priorityFilter.length > 0 ||
-                  selectedLabels.size > 0
-                    ? "bg-blue-50 text-blue-700 border border-blue-200"
-                    : "bg-gray-50 text-gray-600 hover:bg-gray-100 border border-gray-300"
-                }`}
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <Filter className="w-4 h-4" />
-                Filters
-                {(priorityFilter.length > 0 || selectedLabels.size > 0) && (
-                  <span className="bg-blue-100 text-blue-800 text-xs px-1.5 py-0.5 rounded-full">
-                    {priorityFilter.length + selectedLabels.size}
-                  </span>
-                )}
-              </button>
+                <option value="default">Default Order</option>
+                <option value="date">Due Date</option>
+                <option value="priority">Priority</option>
+                <option value="alphabetical">Alphabetical</option>
+              </select>
+
+              <select
+                value={groupBy}
+                onChange={(e) => setGroupBy(e.target.value)}
+                className="px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="none">No Grouping</option>
+                <option value="date">By Date</option>
+                <option value="priority">By Priority</option>
+                <option value="project">By Project</option>
+                <option value="label">By Label</option>
+              </select>
             </div>
+          </div>
+
+          {/* Quick Filter Presets */}
+          <div className="flex flex-wrap gap-2">
+            {quickFilters.map((filter) => {
+              const Icon = filter.icon;
+              const isActive = activeFilters.has(filter.key);
+              return (
+                <button
+                  key={filter.key}
+                  onClick={(e) =>
+                    toggleFilter(
+                      filter.key,
+                      activeFilters,
+                      setActiveFilters,
+                      setSelectedProjects,
+                      e,
+                    )
+                  }
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
+                    isActive
+                      ? "bg-blue-600 text-white shadow-sm"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  }`}
+                >
+                  <Icon className="w-3.5 h-3.5" />
+                  {filter.label}
+                  <span
+                    className={`ml-1 px-1.5 py-0.5 rounded-full text-xs ${
+                      isActive
+                        ? "bg-blue-500 text-blue-100"
+                        : "bg-gray-200 text-gray-600"
+                    }`}
+                  >
+                    {filter.count}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </div>
 
-        {/* Advanced Filters Panel */}
-        {showAdvancedFilters && (
-          <div className="p-4 bg-gray-50 border-b border-gray-100">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {/* Priority Filter */}
-              <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-2 uppercase tracking-wide">
-                  Priority
-                </label>
-                <div className="flex flex-wrap gap-1">
-                  {[4, 3, 2, 1].map((priority) => (
-                    <button
-                      key={priority}
-                      onClick={() => {
-                        const newPriorities = priorityFilter.includes(priority)
-                          ? priorityFilter.filter((p) => p !== priority)
-                          : [...priorityFilter, priority];
-                        setPriorityFilter(newPriorities);
-                      }}
-                      className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
-                        priorityFilter.includes(priority)
-                          ? priority === 4
-                            ? "bg-red-100 text-red-700 border border-red-200"
-                            : priority === 3
-                              ? "bg-yellow-100 text-yellow-700 border border-yellow-200"
-                              : priority === 2
-                                ? "bg-green-100 text-green-700 border border-green-200"
-                                : "bg-gray-100 text-gray-700 border border-gray-200"
-                          : "bg-white text-gray-600 border border-gray-300 hover:bg-gray-50"
-                      }`}
-                    >
-                      P{priority}
-                    </button>
-                  ))}
-                </div>
-              </div>
+        {/* Advanced Filters Accordion */}
+        <div className="border-t border-gray-200">
+          <button
+            onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+            className="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 transition-colors"
+          >
+            <div className="flex items-center gap-2">
+              <Filter className="w-4 h-4 text-gray-500" />
+              <span className="font-medium text-gray-700">
+                Advanced Filters
+              </span>
+              {(priorityFilter.length > 0 || selectedLabels.size > 0) && (
+                <span className="bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded-full font-medium">
+                  {priorityFilter.length + selectedLabels.size} active
+                </span>
+              )}
+            </div>
+            <ChevronDown
+              className={`w-4 h-4 text-gray-500 transition-transform ${
+                showAdvancedFilters ? "rotate-180" : ""
+              }`}
+            />
+          </button>
 
-              {/* Label Filter */}
-              {availableLabels.length > 0 && (
+          {showAdvancedFilters && (
+            <div className="p-4 bg-gray-50 border-t border-gray-200">
+              <div className="space-y-6">
+                {/* Priority Filter */}
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-2 uppercase tracking-wide">
-                    Labels
+                  <label className="block text-sm font-semibold text-gray-700 mb-3">
+                    Filter by Priority
                   </label>
-                  <div className="flex flex-wrap gap-1">
-                    {availableLabels.slice(0, 6).map((label) => (
+                  <div className="flex flex-wrap gap-2">
+                    {[4, 3, 2, 1].map((priority) => (
                       <button
-                        key={label}
+                        key={priority}
                         onClick={() => {
-                          const newLabels = new Set(selectedLabels);
-                          if (newLabels.has(label)) {
-                            newLabels.delete(label);
-                          } else {
-                            newLabels.add(label);
-                          }
-                          setSelectedLabels(newLabels);
+                          const newPriorities = priorityFilter.includes(
+                            priority,
+                          )
+                            ? priorityFilter.filter((p) => p !== priority)
+                            : [...priorityFilter, priority];
+                          setPriorityFilter(newPriorities);
                         }}
-                        className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
-                          selectedLabels.has(label)
-                            ? "bg-purple-100 text-purple-700 border border-purple-200"
+                        className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                          priorityFilter.includes(priority)
+                            ? priority === 4
+                              ? "bg-red-100 text-red-700 border-2 border-red-300"
+                              : priority === 3
+                                ? "bg-yellow-100 text-yellow-700 border-2 border-yellow-300"
+                                : priority === 2
+                                  ? "bg-green-100 text-green-700 border-2 border-green-300"
+                                  : "bg-gray-100 text-gray-700 border-2 border-gray-300"
                             : "bg-white text-gray-600 border border-gray-300 hover:bg-gray-50"
                         }`}
                       >
-                        @{label}
+                        <Flag className="w-3.5 h-3.5" />
+                        Priority {priority}
+                        {priority === 4 && (
+                          <span className="text-xs">(Urgent)</span>
+                        )}
                       </button>
                     ))}
                   </div>
                 </div>
-              )}
 
-              {/* Clear Advanced Filters */}
-              {(priorityFilter.length > 0 || selectedLabels.size > 0) && (
-                <div className="flex items-end">
-                  <button
-                    onClick={() => {
-                      setPriorityFilter([]);
-                      setSelectedLabels(new Set());
-                    }}
-                    className="text-xs text-gray-500 hover:text-gray-700 underline"
-                  >
-                    Clear advanced filters
-                  </button>
-                </div>
-              )}
+                {/* Labels Filter */}
+                {availableLabels.length > 0 && (
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-3">
+                      Filter by Labels
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {availableLabels.map((label) => (
+                        <button
+                          key={label}
+                          onClick={() => {
+                            const newLabels = new Set(selectedLabels);
+                            if (newLabels.has(label)) {
+                              newLabels.delete(label);
+                            } else {
+                              newLabels.add(label);
+                            }
+                            setSelectedLabels(newLabels);
+                          }}
+                          className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                            selectedLabels.has(label)
+                              ? "bg-purple-100 text-purple-700 border-2 border-purple-300"
+                              : "bg-white text-gray-600 border border-gray-300 hover:bg-gray-50"
+                          }`}
+                        >
+                          <Tag className="w-3.5 h-3.5" />@{label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Projects Filter */}
+                {availableProjects.length > 0 && (
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-3">
+                      Filter by Projects
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {availableProjects.slice(0, 8).map((project) => (
+                        <button
+                          key={project.id}
+                          onClick={() => {
+                            const newProjects = new Set(selectedProjects);
+                            if (newProjects.has(project.id)) {
+                              newProjects.delete(project.id);
+                            } else {
+                              newProjects.add(project.id);
+                            }
+                            setSelectedProjects(newProjects);
+                          }}
+                          className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                            selectedProjects.has(project.id)
+                              ? "bg-green-100 text-green-700 border-2 border-green-300"
+                              : "bg-white text-gray-600 border border-gray-300 hover:bg-gray-50"
+                          }`}
+                        >
+                          <Folder className="w-3.5 h-3.5" />
+                          {project.name}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Clear All Advanced Filters */}
+                {(priorityFilter.length > 0 ||
+                  selectedLabels.size > 0 ||
+                  selectedProjects.size > 0) && (
+                  <div className="pt-4 border-t border-gray-300">
+                    <button
+                      onClick={() => {
+                        setPriorityFilter([]);
+                        setSelectedLabels(new Set());
+                        setSelectedProjects(new Set());
+                      }}
+                      className="text-sm text-red-600 hover:text-red-800 font-medium underline"
+                    >
+                      Clear all advanced filters
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
         {/* Active Filters Summary */}
         {(Array.from(activeFilters).filter((f) => f !== "all").length > 0 ||
@@ -425,10 +460,10 @@ const TasksView = (props) => {
           priorityFilter.length > 0 ||
           selectedLabels.size > 0 ||
           searchQuery.trim()) && (
-          <div className="p-3 bg-blue-50 border-b border-blue-100">
+          <div className="px-4 py-3 bg-blue-50 border-t border-blue-200">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-semibold text-blue-700 uppercase tracking-wide">
-                Active Filters ({filteredTasks.length} results)
+              <span className="text-sm font-medium text-blue-800">
+                Showing {filteredTasks.length} of {tasks.length} tasks
               </span>
               <button
                 onClick={() => {
@@ -438,84 +473,59 @@ const TasksView = (props) => {
                   setSelectedLabels(new Set());
                   setSearchQuery("");
                 }}
-                className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                className="text-sm text-blue-600 hover:text-blue-800 font-medium"
               >
-                Clear all
+                Clear all filters
               </button>
             </div>
-            <div className="flex flex-wrap gap-1">
-              {searchQuery.trim() && (
-                <span className="inline-flex items-center gap-1 px-2 py-1 bg-white border border-blue-200 text-blue-800 rounded text-xs">
-                  <Search className="w-3 h-3" />"{searchQuery}"
-                  <button
-                    onClick={() => setSearchQuery("")}
-                    className="text-blue-600 hover:text-blue-800"
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
-                </span>
-              )}
-              {Array.from(activeFilters)
-                .filter((f) => f !== "all")
-                .map((filter) => (
-                  <span
-                    key={filter}
-                    className="inline-flex items-center gap-1 px-2 py-1 bg-white border border-blue-200 text-blue-800 rounded text-xs"
-                  >
-                    {filter}
-                    <button
-                      onClick={() => handleRemoveFilter("quick", filter)}
-                      className="text-blue-600 hover:text-blue-800"
+            {(Array.from(activeFilters).filter((f) => f !== "all").length > 0 ||
+              selectedProjects.size > 0 ||
+              priorityFilter.length > 0 ||
+              selectedLabels.size > 0 ||
+              searchQuery.trim()) && (
+              <div className="flex flex-wrap gap-1">
+                {searchQuery.trim() && (
+                  <span className="inline-flex items-center gap-1 px-2 py-1 bg-white border border-blue-300 text-blue-800 rounded text-xs">
+                    <Search className="w-3 h-3" />"{searchQuery}"
+                  </span>
+                )}
+                {Array.from(activeFilters)
+                  .filter((f) => f !== "all")
+                  .map((filter) => (
+                    <span
+                      key={filter}
+                      className="inline-flex items-center gap-1 px-2 py-1 bg-white border border-blue-300 text-blue-800 rounded text-xs"
                     >
-                      <X className="w-3 h-3" />
-                    </button>
+                      {filter}
+                    </span>
+                  ))}
+                {priorityFilter.map((priority) => (
+                  <span
+                    key={priority}
+                    className="inline-flex items-center gap-1 px-2 py-1 bg-white border border-blue-300 text-blue-800 rounded text-xs"
+                  >
+                    P{priority}
                   </span>
                 ))}
-              {Array.from(selectedProjects).map((projectId) => (
-                <span
-                  key={projectId}
-                  className="inline-flex items-center gap-1 px-2 py-1 bg-white border border-green-200 text-green-800 rounded text-xs"
-                >
-                  <Folder className="w-3 h-3" />
-                  {availableProjects.find((p) => p.id === projectId)?.name ||
-                    projectId}
-                  <button
-                    onClick={() => handleRemoveFilter("project", projectId)}
-                    className="text-green-600 hover:text-green-800"
+                {Array.from(selectedLabels).map((label) => (
+                  <span
+                    key={label}
+                    className="inline-flex items-center gap-1 px-2 py-1 bg-white border border-blue-300 text-blue-800 rounded text-xs"
                   >
-                    <X className="w-3 h-3" />
-                  </button>
-                </span>
-              ))}
-              {priorityFilter.map((priority) => (
-                <span
-                  key={priority}
-                  className="inline-flex items-center gap-1 px-2 py-1 bg-white border border-orange-200 text-orange-800 rounded text-xs"
-                >
-                  <Flag className="w-3 h-3" />P{priority}
-                  <button
-                    onClick={() => handleRemoveFilter("priority", priority)}
-                    className="text-orange-600 hover:text-orange-800"
+                    @{label}
+                  </span>
+                ))}
+                {Array.from(selectedProjects).map((projectId) => (
+                  <span
+                    key={projectId}
+                    className="inline-flex items-center gap-1 px-2 py-1 bg-white border border-blue-300 text-blue-800 rounded text-xs"
                   >
-                    <X className="w-3 h-3" />
-                  </button>
-                </span>
-              ))}
-              {Array.from(selectedLabels).map((label) => (
-                <span
-                  key={label}
-                  className="inline-flex items-center gap-1 px-2 py-1 bg-white border border-purple-200 text-purple-800 rounded text-xs"
-                >
-                  <Tag className="w-3 h-3" />@{label}
-                  <button
-                    onClick={() => handleRemoveFilter("label", label)}
-                    className="text-purple-600 hover:text-purple-800"
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
-                </span>
-              ))}
-            </div>
+                    {availableProjects.find((p) => p.id === projectId)?.name ||
+                      projectId}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>

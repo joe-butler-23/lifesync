@@ -1,5 +1,4 @@
-
-import React from "react";
+import React, { useState } from "react";
 import {
   Calendar,
   CheckSquare,
@@ -30,7 +29,14 @@ const Dashboard = ({
   setShowAddTaskModal,
   setEditingTask,
   setShowEditTaskModal,
+  editingTask,
+  showEditTaskModal,
 }) => {
+  const [scratchpadContent, setScratchpadContent] = useState(
+    localStorage.getItem(`scratchpad-${selectedDate?.toLocaleDateString()}`) || "",
+  );
+  const [isFullScreenScratchpad, setIsFullScreenScratchpad] = useState(false);
+
   const navigateDay = (direction) => {
     const newDate = new Date(selectedDate);
     newDate.setDate(selectedDate.getDate() + direction);

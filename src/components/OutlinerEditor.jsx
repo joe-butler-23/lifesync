@@ -147,6 +147,8 @@ const OutlinerEditor = ({ content, onChange }) => {
     
     // Ensure parent is expanded
     setExpandedNodes(prev => new Set([...prev, parentId]));
+    
+    return newId;
   };
 
   // Indent node (move as child of previous sibling)
@@ -224,15 +226,28 @@ const OutlinerEditor = ({ content, onChange }) => {
   const handleKeyDown = (e, nodeId, parentId) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      addNode(parentId, nodeId);
+      const newId = addNode(parentId, nodeId);
+      // Focus will be set in the addNode function
     } else if (e.key === 'Tab') {
       e.preventDefault();
       if (e.shiftKey) {
         // Shift+Tab: unindent
         unindentNode(nodeId, parentId);
+        // Keep focus on current node after unindent
+        setTimeout(() => {
+          if (inputRefs.current[nodeId]) {
+            inputRefs.current[nodeId].focus();
+          }
+        }, 0);
       } else {
         // Tab: indent
         indentNode(nodeId, parentId);
+        // Keep focus on current node after indent
+        setTimeout(() => {
+          if (inputRefs.current[nodeId]) {
+            inputRefs.current[nodeId].focus();
+          }
+        }, 0);
       }
     } else if (e.key === 'Escape') {
       setEditingNode(null);
@@ -242,12 +257,15 @@ const OutlinerEditor = ({ content, onChange }) => {
     }
   };
 
-  // Focus input when editing starts
+  // Focus input when editing starts or changes
   useEffect(() => {
     if (editingNode && inputRefs.current[editingNode]) {
-      inputRefs.current[editingNode].focus();
+      const input = inputRefs.current[editingNode];
+      input.focus();
+      // Set cursor to end of text
+      input.setSelectionRange(input.value.length, input.value.length);
     }
-  }, [editingNode]);
+  }, [editingNode, data]); // Also trigger when data changes
 
   // Render a single node
   const renderNode = (node, parentId = null, depth = 0) => {
@@ -302,10 +320,18 @@ const OutlinerEditor = ({ content, onChange }) => {
                 type="text"
                 value={node.content}
                 onChange={(e) => updateNodeContent(node.id, e.target.value)}
-                onBlur={() => setEditingNode(null)}
+                onBlur={(e) => {
+                  // Only blur if not immediately focusing another input
+                  setTimeout(() => {
+                    if (!document.activeElement || !document.activeElement.matches('input[type="text"]')) {
+                      setEditingNode(null);
+                    }
+                  }, 0);
+                }}
                 onKeyDown={(e) => handleKeyDown(e, node.id, parentId)}
                 className="w-full bg-transparent border-none outline-none text-gray-900"
                 placeholder="Type something..."
+                autoFocus
               />
             ) : (
               <div

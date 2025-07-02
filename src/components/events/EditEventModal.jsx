@@ -1,141 +1,96 @@
 import React, { useState } from 'react';
 
 const EditEventModal = ({ event, onClose, onSave, onDelete }) => {
-  const [editedTitle, setEditedTitle] = useState(event.title);
-  const [editedStartDate, setEditedStartDate] = useState(
-    new Date(event.start).toISOString().split('T')[0]
+  const [title, setTitle] = useState(event?.title || '');
+  const [startTime, setStartTime] = useState(
+    event?.start ? new Date(event.start).toISOString().slice(0, 16) : ''
   );
-  const [editedStartTime, setEditedStartTime] = useState(
-    new Date(event.start).toTimeString().slice(0, 5)
+  const [endTime, setEndTime] = useState(
+    event?.end ? new Date(event.end).toISOString().slice(0, 16) : ''
   );
-  const [editedEndDate, setEditedEndDate] = useState(
-    new Date(event.end).toISOString().split('T')[0]
-  );
-  const [editedEndTime, setEditedEndTime] = useState(
-    new Date(event.end).toTimeString().slice(0, 5)
-  );
-  const [editedLocation, setEditedLocation] = useState(event.location || '');
-  const [editedDescription, setEditedDescription] = useState(event.description || '');
+  const [description, setDescription] = useState(event?.description || '');
 
   const handleSave = () => {
-    // Combine date and time for start and end
-    const startDateTime = new Date(`${editedStartDate}T${editedStartTime}`);
-    const endDateTime = new Date(`${editedEndDate}T${editedEndTime}`);
-
     const eventData = {
-      summary: editedTitle,
-      start: {
-        dateTime: startDateTime.toISOString(),
-        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-      },
-      end: {
-        dateTime: endDateTime.toISOString(),
-        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-      },
-      location: editedLocation,
-      description: editedDescription,
+      title,
+      start: new Date(startTime).toISOString(),
+      end: new Date(endTime).toISOString(),
+      description
     };
-
     onSave(event.id, eventData);
-    onClose();
   };
 
   const handleDelete = () => {
-    onDelete(event.id);
-    onClose();
+    if (window.confirm('Are you sure you want to delete this event?')) {
+      onDelete(event.id);
+    }
   };
 
   return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
       <div className="bg-white p-8 rounded-lg shadow-xl max-w-md w-full">
-        <h3 className="text-xl font-bold mb-4">Edit Calendar Event</h3>
-        
+        <h3 className="text-xl font-bold mb-4">Edit Event</h3>
+
         <div className="mb-4">
-          <label htmlFor="editEventTitle" className="block text-gray-700 text-sm font-bold mb-2">Event Title</label>
+          <label htmlFor="eventTitle" className="block text-gray-700 text-sm font-bold mb-2">
+            Event Title
+          </label>
           <input
             type="text"
-            id="editEventTitle"
+            id="eventTitle"
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            value={editedTitle}
-            onChange={(e) => setEditedTitle(e.target.value)}
-            placeholder="e.g., Team Meeting"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-4 mb-4">
-          <div>
-            <label className="block text-gray-700 text-sm font-bold mb-2">Start Date</label>
-            <input
-              type="date"
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              value={editedStartDate}
-              onChange={(e) => setEditedStartDate(e.target.value)}
-            />
-          </div>
-          <div>
-            <label className="block text-gray-700 text-sm font-bold mb-2">Start Time</label>
-            <input
-              type="time"
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              value={editedStartTime}
-              onChange={(e) => setEditedStartTime(e.target.value)}
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4 mb-4">
-          <div>
-            <label className="block text-gray-700 text-sm font-bold mb-2">End Date</label>
-            <input
-              type="date"
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              value={editedEndDate}
-              onChange={(e) => setEditedEndDate(e.target.value)}
-            />
-          </div>
-          <div>
-            <label className="block text-gray-700 text-sm font-bold mb-2">End Time</label>
-            <input
-              type="time"
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              value={editedEndTime}
-              onChange={(e) => setEditedEndTime(e.target.value)}
-            />
-          </div>
+        <div className="mb-4">
+          <label htmlFor="eventStart" className="block text-gray-700 text-sm font-bold mb-2">
+            Start Time
+          </label>
+          <input
+            type="datetime-local"
+            id="eventStart"
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            value={startTime}
+            onChange={(e) => setStartTime(e.target.value)}
+          />
         </div>
 
         <div className="mb-4">
-          <label htmlFor="editEventLocation" className="block text-gray-700 text-sm font-bold mb-2">Location (Optional)</label>
+          <label htmlFor="eventEnd" className="block text-gray-700 text-sm font-bold mb-2">
+            End Time
+          </label>
           <input
-            type="text"
-            id="editEventLocation"
+            type="datetime-local"
+            id="eventEnd"
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            value={editedLocation}
-            onChange={(e) => setEditedLocation(e.target.value)}
-            placeholder="e.g., Conference Room A"
+            value={endTime}
+            onChange={(e) => setEndTime(e.target.value)}
           />
         </div>
 
         <div className="mb-6">
-          <label htmlFor="editEventDescription" className="block text-gray-700 text-sm font-bold mb-2">Description (Optional)</label>
+          <label htmlFor="eventDescription" className="block text-gray-700 text-sm font-bold mb-2">
+            Description
+          </label>
           <textarea
-            id="editEventDescription"
+            id="eventDescription"
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             rows="3"
-            value={editedDescription}
-            onChange={(e) => setEditedDescription(e.target.value)}
-            placeholder="Event details..."
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
           />
         </div>
 
         <div className="flex justify-between">
           <button
             onClick={handleDelete}
-            className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
           >
             Delete Event
           </button>
-          <div className="flex space-x-4">
+          <div className="space-x-4">
             <button
               onClick={onClose}
               className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"

@@ -1,28 +1,19 @@
 import { isTaskOverdue, isTaskDueToday, isTaskDueThisWeek } from './dateUtils';
 
 export const getFilteredTasks = (tasks, activeFilters, selectedProjects) => {
-  let filtered = [...tasks];
+  let filtered = tasks.filter(task => 
+    !task.project_name || task.project_name.toLowerCase() !== 'shopping list'
+  );
 
-  // Always exclude shopping list project by default (unless specifically selected)
-  if (!selectedProjects.has('shopping_list') && !activeFilters.has('shopping_list')) {
-    filtered = filtered.filter(task => 
-      !task.project_name || 
-      task.project_name.toLowerCase() !== 'shopping list'
-    );
-  }
-
-  // Apply date-based filters
   if (activeFilters.has('today')) {
-    filtered = filtered.filter(task => isTaskDueToday(task) || !task.due);
+    filtered = filtered.filter(task => isTaskDueToday(task));
   }
   if (activeFilters.has('week')) {
-    filtered = filtered.filter(task => isTaskDueThisWeek(task) || !task.due);
+    filtered = filtered.filter(task => isTaskDueThisWeek(task));
   }
   if (activeFilters.has('overdue')) {
     filtered = filtered.filter(task => isTaskOverdue(task));
   }
-
-  // Apply custom project filters
   if (activeFilters.has('bridge_club')) {
     filtered = filtered.filter(task => 
       task.project_name && task.project_name.toLowerCase().includes('bridge club')
@@ -39,76 +30,70 @@ export const getFilteredTasks = (tasks, activeFilters, selectedProjects) => {
     );
   }
 
-  // Apply project filters
   if (selectedProjects.size > 0) {
     filtered = filtered.filter(task => 
-      selectedProjects.has(task.project_id) || 
-      selectedProjects.has('inbox')
+      task.project_id && selectedProjects.has(task.project_id)
     );
-  }
-
-  // If 'all' is the only active filter, return everything (minus shopping list)
-  if (activeFilters.size === 1 && activeFilters.has('all')) {
-    return filtered;
   }
 
   return filtered;
 };
 
-export const getSortedTasks = (filteredTasks, sortBy) => {
-  let sorted = [...filteredTasks];
+export const getSortedTasks = (tasks, sortBy) => {
+  const sorted = [...tasks];
 
   switch (sortBy) {
     case 'date':
-      sorted.sort((a, b) => {
+      return sorted.sort((a, b) => {
         if (!a.due && !b.due) return 0;
         if (!a.due) return 1;
         if (!b.due) return -1;
         return new Date(a.due) - new Date(b.due);
       });
-      break;
     case 'priority':
-      sorted.sort((a, b) => (b.priority || 1) - (a.priority || 1));
-      break;
+      return sorted.sort((a, b) => (b.priority || 0) - (a.priority || 0));
     case 'alphabetical':
-      sorted.sort((a, b) => (a.content || a.title || '').localeCompare(b.content || b.title || ''));
-      break;
+      return sorted.sort((a, b) => (a.content || a.title || '').localeCompare(b.content || b.title || ''));
     default:
-      // 'default' - keep original order
-      break;
+      return sorted;
   }
-
-  return sorted;
 };
 
-export const getGroupedTasks = (sortedTasks, groupBy) => {
+export const getGroupedTasks = (tasks, groupBy) => {
   if (groupBy === 'none') {
-    return { 'All Tasks': sortedTasks };
+    return { 'All Tasks': tasks };
   }
 
   const groups = {};
 
-  sortedTasks.forEach(task => {
+  tasks.forEach(task => {
     let groupKey;
-    
+
     switch (groupBy) {
-      case 'priority':
-        groupKey = task.priority ? `Priority ${task.priority}` : 'No Priority';
-        break;
       case 'project':
         groupKey = task.project_name || 'No Project';
         break;
+      case 'priority':
+        groupKey = task.priority ? `Priority ${task.priority}` : 'No Priority';
+        break;
       case 'date':
-        if (!task.due) {
-          groupKey = 'No Due Date';
-        } else if (isTaskOverdue(task)) {
+        if (isTaskOverdue(task)) {
           groupKey = 'Overdue';
         } else if (isTaskDueToday(task)) {
           groupKey = 'Today';
         } else if (isTaskDueThisWeek(task)) {
           groupKey = 'This Week';
-        } else {
+        } else if (task.due) {
           groupKey = 'Later';
+        } else {
+          groupKey = 'No Due Date';
+        }
+        break;
+      case 'label':
+        if (task.labels && task.labels.length > 0) {
+          groupKey = task.labels[0];
+        } else {
+          groupKey = 'No Label';
         }
         break;
       default:
@@ -137,18 +122,14 @@ export const getUnscheduledTasks = (tasks, taskFilter) => {
       filteredTasks = filteredTasks.filter(task => 
         task.project_name && task.project_name.toLowerCase().includes('bridge club')
       );
-      break;
     case 'home':
       filteredTasks = filteredTasks.filter(task => 
         task.project_name && task.project_name.toLowerCase() === 'home'
       );
-      break;
     case 'urgent':
       filteredTasks = filteredTasks.filter(task => task.priority === 4);
-      break;
     case 'all':
     default:
-      // No additional filtering needed for 'all'
       break;
   }
   return filteredTasks;

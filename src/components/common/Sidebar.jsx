@@ -1,64 +1,43 @@
 import React from 'react';
-import { 
-  Calendar, 
-  CheckSquare, 
-  Utensils, 
-  Dumbbell, 
-  MessageCircle, 
-  Settings, 
-  Home, 
-  BarChart3, 
-  Target 
-} from 'lucide-react';
+import { Calendar, CheckSquare, Utensils, Dumbbell, MessageCircle, Settings, BarChart3 } from 'lucide-react';
 
 const Sidebar = ({ activeView, setActiveView }) => {
-  const navigationItems = [
-            { id: 'dashboard', label: 'Day Planner', icon: Home },
+  const menuItems = [
+    { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
     { id: 'planner', label: 'Weekly Planner', icon: Calendar },
     { id: 'tasks', label: 'Tasks', icon: CheckSquare },
-    { id: 'workouts', label: 'Workouts', icon: Dumbbell },
-    { id: 'nutrition', label: 'Nutrition', icon: Utensils },
-    { id: 'analytics', label: 'Analytics', icon: BarChart3 },
-    { id: 'claude', label: 'Claude Assistant', icon: MessageCircle }
+    { id: 'claude', label: 'Claude Assistant', icon: MessageCircle },
+    { id: 'settings', label: 'Settings', icon: Settings }
   ];
 
   return (
-    <div className="w-64 bg-gray-900 text-white p-4 flex flex-col">
-      <div className="flex items-center mb-8">
-        <div className="w-8 h-8 bg-blue-500 rounded-lg mr-3 flex items-center justify-center">
-          <Target className="w-4 h-4" />
-        </div>
-        <h1 className="text-xl font-bold">LifeSync</h1>
+    <div className="w-64 bg-white shadow-lg h-full flex flex-col">
+      <div className="p-6 border-b">
+        <h1 className="text-xl font-bold text-gray-900">Life Dashboard</h1>
       </div>
-      
-      <nav className="flex-1">
-        <div className="space-y-2">
-          {navigationItems.map(item => (
-            <button
-              key={item.id}
-              onClick={() => setActiveView(item.id)}
-              className={`w-full flex items-center px-3 py-2 rounded-lg transition-colors ${
-                activeView === item.id ? 'bg-blue-600' : 'hover:bg-gray-800'
-              }`}
-            >
-              <item.icon className="w-5 h-5 mr-3" />
-              {item.label}
-            </button>
-          ))}
-        </div>
+
+      <nav className="flex-1 p-4">
+        <ul className="space-y-2">
+          {menuItems.map(item => {
+            const Icon = item.icon;
+            return (
+              <li key={item.id}>
+                <button
+                  onClick={() => setActiveView(item.id)}
+                  className={`w-full flex items-center px-4 py-3 text-left rounded-lg transition-colors ${
+                    activeView === item.id
+                      ? 'bg-blue-100 text-blue-700 border-r-2 border-blue-700'
+                      : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                  }`}
+                >
+                  <Icon className="w-5 h-5 mr-3" />
+                  {item.label}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
       </nav>
-      
-      <div className="border-t border-gray-700 pt-4">
-        <button
-          onClick={() => setActiveView('settings')}
-          className={`w-full flex items-center px-3 py-2 rounded-lg transition-colors ${
-            activeView === 'settings' ? 'bg-blue-600' : 'hover:bg-gray-800'
-          }`}
-        >
-          <Settings className="w-5 h-5 mr-3" />
-          Settings
-        </button>
-      </div>
     </div>
   );
 };

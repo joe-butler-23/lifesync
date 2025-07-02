@@ -17,30 +17,24 @@ export const formatDateForTodoist = (dateInput) => {
   return dateInput;
 };
 
-export const getWeekDates = (weekStart) => {
+export const getWeekDates = (startDate) => {
   const dates = [];
+  const current = new Date(startDate);
+
   for (let i = 0; i < 7; i++) {
-    const date = new Date(weekStart);
-    date.setDate(weekStart.getDate() + i);
-    dates.push(date);
+    dates.push(new Date(current));
+    current.setDate(current.getDate() + 1);
   }
+
   return dates;
 };
 
-export const formatWeekRange = (weekStart) => {
-  const weekEnd = new Date(weekStart);
-  weekEnd.setDate(weekStart.getDate() + 6);
-  
-  const startMonth = weekStart.toLocaleDateString('en-US', { month: 'short' });
-  const endMonth = weekEnd.toLocaleDateString('en-US', { month: 'short' });
-  const startDay = weekStart.getDate();
-  const endDay = weekEnd.getDate();
-  
-  if (startMonth === endMonth) {
-    return `${startMonth} ${startDay} - ${endDay}`;
-  } else {
-    return `${startMonth} ${startDay} - ${endMonth} ${endDay}`;
-  }
+export const formatWeekRange = (startDate) => {
+  const endDate = new Date(startDate);
+  endDate.setDate(startDate.getDate() + 6);
+
+  const options = { month: 'short', day: 'numeric' };
+  return `${startDate.toLocaleDateString('en-US', options)} - ${endDate.toLocaleDateString('en-US', options)}`;
 };
 
 export const getCurrentWeekStart = () => {
@@ -52,22 +46,24 @@ export const getCurrentWeekStart = () => {
 
 export const isTaskOverdue = (task) => {
   if (!task.due) return false;
-  const today = new Date();
   const dueDate = new Date(task.due);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
   return dueDate < today && !task.completed;
 };
 
 export const isTaskDueToday = (task) => {
   if (!task.due) return false;
-  const today = new Date();
   const dueDate = new Date(task.due);
+  const today = new Date();
   return dueDate.toDateString() === today.toDateString();
 };
 
 export const isTaskDueThisWeek = (task) => {
   if (!task.due) return false;
-  const today = new Date();
-  const weekFromNow = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
   const dueDate = new Date(task.due);
+  const today = new Date();
+  const weekFromNow = new Date(today);
+  weekFromNow.setDate(today.getDate() + 7);
   return dueDate >= today && dueDate <= weekFromNow;
 };

@@ -2236,29 +2236,24 @@ const LifeDashboardApp = () => {
         return;
       }
 
-      // Handle workout scheduling
-      try {
-        const targetDate = new Date(destination.droppableId);
-        const dateKey = targetDate.toISOString().split('T')[0];
-        setScheduledWorkouts(prev => {
-          const newScheduled = { ...prev };
+      // Handle workout scheduling - droppableId is already the date key
+      const dateKey = destination.droppableId;
+      setScheduledWorkouts(prev => {
+        const newScheduled = { ...prev };
 
-          // Remove from any existing dates first
-          Object.keys(newScheduled).forEach(existingDateKey => {
-            newScheduled[existingDateKey] = newScheduled[existingDateKey].filter(id => id !== draggableId);
-          });
-
-          // Add to new date
-          if (!newScheduled[dateKey]) {
-            newScheduled[dateKey] = [];
-          }
-          newScheduled[dateKey].push(draggableId);
-
-          return newScheduled;
+        // Remove from any existing dates first
+        Object.keys(newScheduled).forEach(existingDateKey => {
+          newScheduled[existingDateKey] = newScheduled[existingDateKey].filter(id => id !== draggableId);
         });
-      } catch (error) {
-          console.error('Invalid date for workout scheduling:', destination.droppableId);
-      }
+
+        // Add to new date
+        if (!newScheduled[dateKey]) {
+          newScheduled[dateKey] = [];
+        }
+        newScheduled[dateKey].push(draggableId);
+
+        return newScheduled;
+      });
       return;
     }
 

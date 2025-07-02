@@ -3,11 +3,11 @@ import EnhancedDateInput from "../EnhancedDateInput";
 
 const EditTaskModal = ({
   task,
-  isOpen,
+  isOpen = true,
   onClose,
   onSave,
   onDelete,
-  availableProjects,
+  availableProjects = [],
 }) => {
   const [taskContent, setTaskContent] = useState("");
   const [taskDescription, setTaskDescription] = useState("");
@@ -29,25 +29,21 @@ const EditTaskModal = ({
   }, [task]);
 
   const handleSave = () => {
-    const updatedTask = {
-      ...task,
+    const updates = {
       content: taskContent,
       description: taskDescription,
       priority: taskPriority,
-      due: taskDueDate,
+      due_string: taskDueDate || null,
       project_id: taskProjectId || null,
       labels: taskLabels
         ? taskLabels.split(",").map((label) => label.trim())
         : [],
     };
-    onSave(updatedTask);
+    onSave(task.id, updates);
   };
 
   return (
-    <div
-      className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center"
-      style={{ display: isOpen ? "flex" : "none" }}
-    >
+    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
       <div className="bg-white p-8 rounded-lg shadow-xl max-w-md w-full">
         <h3 className="text-xl font-bold mb-4">Edit Task</h3>
 

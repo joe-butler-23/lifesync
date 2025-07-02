@@ -3089,6 +3089,8 @@ const LifeDashboardApp = () => {
             task={editingTask}
             onClose={() => setShowEditTaskModal(false)}
             onSave={handleEditTask}
+            onDelete={handleDeleteTask}
+            availableProjects={availableProjects}
           />
         )}
         {showEditEventModal && editingEvent && (

@@ -12,7 +12,12 @@ import {
   Tag,
   Clock,
   MoreHorizontal,
+  Home,
+  ChefHat,
+  Users,
+  ChevronRight,
 } from "lucide-react";
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import EnhancedDateInput from "./EnhancedDateInput";
 import {
   getFilteredTasks,
@@ -64,6 +69,8 @@ const TasksView = (props) => {
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [selectedLabels, setSelectedLabels] = useState(new Set());
   const [priorityFilter, setPriorityFilter] = useState([]);
+  const [collapsedGroups, setCollapsedGroups] = useState(new Set());
+  const [groupOrder, setGroupOrder] = useState([]);
 
   const filteredTasks = useMemo(() => {
     let filtered = getFilteredTasks(tasks, activeFilters, selectedProjects);
@@ -142,7 +149,7 @@ const TasksView = (props) => {
     {
       key: "bridge_club",
       label: "Bridge Club",
-      icon: Folder,
+      icon: Users,
       count: tasks.filter(
         (t) =>
           t.project_name &&
@@ -152,7 +159,7 @@ const TasksView = (props) => {
     {
       key: "home",
       label: "Home",
-      icon: Folder,
+      icon: Home,
       count: tasks.filter(
         (t) => t.project_name && t.project_name.toLowerCase() === "home",
       ).length,
@@ -160,7 +167,7 @@ const TasksView = (props) => {
     {
       key: "cooking",
       label: "Cooking",
-      icon: Folder,
+      icon: ChefHat,
       count: tasks.filter(
         (t) =>
           t.project_name && t.project_name.toLowerCase() === "meal_planning",
@@ -186,6 +193,52 @@ const TasksView = (props) => {
       setPriorityFilter(priorityFilter.filter((p) => p !== value));
     }
   };
+
+  const toggleGroupCollapse = (groupName) => {
+    const newCollapsed = new Set(collapsedGroups);
+    if (newCollapsed.has(groupName)) {
+      newCollapsed.delete(groupName);
+    } else {
+      newCollapsed.add(groupName);
+    }
+    setCollapsedGroups(newCollapsed);
+  };
+
+  const handleGroupDragEnd = (result) => {
+    if (!result.destination) return;
+
+    const groups = Object.keys(groupedTasks);
+    const newOrder = Array.from(groups);
+    const [reorderedItem] = newOrder.splice(result.source.index, 1);
+    newOrder.splice(result.destination.index, 0, reorderedItem);
+    setGroupOrder(newOrder);
+  };
+
+  // Apply custom group ordering if available
+  const orderedGroupedTasks = useMemo(() => {
+    if (groupOrder.length === 0 || groupBy === "none") {
+      return groupedTasks;
+    }
+
+    const ordered = {};
+    const groupKeys = Object.keys(groupedTasks);
+
+    // Add groups in custom order
+    groupOrder.forEach((groupName) => {
+      if (groupedTasks[groupName]) {
+        ordered[groupName] = groupedTasks[groupName];
+      }
+    });
+
+    // Add any new groups that aren't in the custom order
+    groupKeys.forEach((groupName) => {
+      if (!groupOrder.includes(groupName)) {
+        ordered[groupName] = groupedTasks[groupName];
+      }
+    });
+
+    return ordered;
+  }, [groupedTasks, groupOrder, groupBy]);
 
   return (
     <div className="p-6">
@@ -543,170 +596,306 @@ const TasksView = (props) => {
           </p>
         )}
 
-        {!loadingTodoistTasks &&
-          tasks.length > 0 &&
-          Object.entries(groupedTasks).map(([groupName, groupTasks]) => (
-            <div key={groupName} className="space-y-3">
-              {groupBy !== "none" && (
-                <div className="flex items-center justify-between sticky top-0 bg-gray-50 py-2 px-4 rounded-lg border-l-4 border-blue-500">
-                  <div className="flex items-center">
-                    <h3 className="text-lg font-semibold text-gray-900">
-                      {groupName}
-                    </h3>
-                    <span className="ml-3 px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded-full font-medium">
-                      {groupTasks.length} task
-                      {groupTasks.length !== 1 ? "s" : ""}
-                    </span>
-                  </div>
-                  {groupTasks.filter((t) => !t.completed).length !==
-                    groupTasks.length && (
-                    <span className="text-xs text-gray-500">
-                      {groupTasks.filter((t) => !t.completed).length} active
-                    </span>
+        {!loadingTodoistTasks && tasks.length > 0 && (
+          <DragDropContext onDragEnd={handleGroupDragEnd}>
+            <Droppable droppableId="groups" type="GROUP">
+              {(provided) => (
+                <div
+                  {...provided.droppableProps}
+                  ref={provided.innerRef}
+                  className="space-y-6"
+                >
+                  {Object.entries(orderedGroupedTasks).map(
+                    ([groupName, groupTasks], index) => (
+                      <Draggable
+                        key={groupName}
+                        draggableId={groupName}
+                        index={index}
+                        isDragDisabled={groupBy === "none"}
+                      >
+                        {(provided, snapshot) => (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            className={`space-y-3 ${snapshot.isDragging ? "opacity-75" : ""}`}
+                          >
+                            {groupBy !== "none" && (
+                              <div
+                                className={`flex items-center justify-between sticky top-0 bg-white py-3 px-4 rounded-lg border-l-4 border-blue-500 shadow-sm ${
+                                  snapshot.isDragging ? "shadow-lg" : ""
+                                }`}
+                              >
+                                <div className="flex items-center gap-3">
+                                  {groupBy === "project" && (
+                                    <div className="flex items-center gap-2">
+                                      <div
+                                        {...provided.dragHandleProps}
+                                        className="cursor-grab active:cursor-grabbing p-1 rounded hover:bg-gray-100"
+                                        title="Drag to reorder groups"
+                                      >
+                                        <svg
+                                          width="12"
+                                          height="12"
+                                          viewBox="0 0 24 24"
+                                          fill="currentColor"
+                                          className="text-gray-400"
+                                        >
+                                          <circle cx="9" cy="6" r="1" />
+                                          <circle cx="15" cy="6" r="1" />
+                                          <circle cx="9" cy="12" r="1" />
+                                          <circle cx="15" cy="12" r="1" />
+                                          <circle cx="9" cy="18" r="1" />
+                                          <circle cx="15" cy="18" r="1" />
+                                        </svg>
+                                      </div>
+                                      <button
+                                        onClick={() =>
+                                          toggleGroupCollapse(groupName)
+                                        }
+                                        className="p-1 rounded-lg hover:bg-gray-100 transition-colors"
+                                        title={
+                                          collapsedGroups.has(groupName)
+                                            ? "Expand group"
+                                            : "Collapse group"
+                                        }
+                                      >
+                                        <ChevronRight
+                                          className={`w-4 h-4 text-gray-500 transition-transform ${
+                                            collapsedGroups.has(groupName)
+                                              ? ""
+                                              : "rotate-90"
+                                          }`}
+                                        />
+                                      </button>
+                                    </div>
+                                  )}
+                                  <div className="flex items-center gap-2">
+                                    {groupName
+                                      .toLowerCase()
+                                      .includes("bridge") ? (
+                                      <Users className="w-5 h-5 text-blue-600" />
+                                    ) : groupName
+                                        .toLowerCase()
+                                        .includes("home") ? (
+                                      <Home className="w-5 h-5 text-green-600" />
+                                    ) : groupName
+                                        .toLowerCase()
+                                        .includes("meal") ||
+                                      groupName
+                                        .toLowerCase()
+                                        .includes("cooking") ? (
+                                      <ChefHat className="w-5 h-5 text-orange-600" />
+                                    ) : (
+                                      <Folder className="w-5 h-5 text-gray-600" />
+                                    )}
+                                    <h3 className="text-lg font-semibold text-gray-900">
+                                      {groupName}
+                                    </h3>
+                                  </div>
+                                  <span className="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded-full font-medium">
+                                    {groupTasks.length} task
+                                    {groupTasks.length !== 1 ? "s" : ""}
+                                  </span>
+                                </div>
+                                {groupTasks.filter((t) => !t.completed)
+                                  .length !== groupTasks.length && (
+                                  <span className="text-xs text-gray-500">
+                                    {
+                                      groupTasks.filter((t) => !t.completed)
+                                        .length
+                                    }{" "}
+                                    active
+                                  </span>
+                                )}
+                              </div>
+                            )}
+
+                            {/* Tasks in Group */}
+                            {(!collapsedGroups.has(groupName) ||
+                              groupBy !== "project") && (
+                              <div className="space-y-3">
+                                {groupTasks.map((task) => (
+                                  <div
+                                    key={task.id}
+                                    className="bg-white rounded-xl p-4 shadow-sm border flex items-center justify-between hover:shadow-md transition-shadow"
+                                  >
+                                    <div className="flex items-center">
+                                      <input
+                                        type="checkbox"
+                                        className="mr-3 rounded"
+                                        checked={task.completed}
+                                        onChange={() =>
+                                          handleTaskCompletionToggle(
+                                            task.id,
+                                            task.completed,
+                                          )
+                                        }
+                                      />
+                                      <div>
+                                        <p
+                                          className={`font-medium ${task.completed ? "line-through text-gray-500" : "text-gray-900"}`}
+                                        >
+                                          {task.content || task.title}
+                                        </p>
+                                        <div className="flex items-center text-xs text-gray-500 mt-1 space-x-2">
+                                          {task.priority && (
+                                            <span
+                                              className={`px-2 py-1 rounded-full ${
+                                                task.priority === 4
+                                                  ? "bg-red-100 text-red-600"
+                                                  : task.priority === 3
+                                                    ? "bg-yellow-100 text-yellow-600"
+                                                    : task.priority === 2
+                                                      ? "bg-green-100 text-green-600"
+                                                      : "bg-gray-100 text-gray-600"
+                                              }`}
+                                            >
+                                              P{task.priority}
+                                            </span>
+                                          )}
+                                          {task.project_name &&
+                                            groupBy !== "project" && (
+                                              <span className="px-2 py-1 bg-blue-100 text-blue-600 rounded-full flex items-center gap-1">
+                                                {task.project_name
+                                                  .toLowerCase()
+                                                  .includes("bridge club") ? (
+                                                  <Users className="w-3 h-3" />
+                                                ) : task.project_name.toLowerCase() ===
+                                                  "home" ? (
+                                                  <Home className="w-3 h-3" />
+                                                ) : task.project_name.toLowerCase() ===
+                                                  "meal_planning" ? (
+                                                  <ChefHat className="w-3 h-3" />
+                                                ) : (
+                                                  <Folder className="w-3 h-3" />
+                                                )}
+                                                {task.project_name
+                                                  .toLowerCase()
+                                                  .includes("bridge club")
+                                                  ? "Bridge Club"
+                                                  : task.project_name}
+                                              </span>
+                                            )}
+                                          {task.labels &&
+                                            task.labels.length > 0 &&
+                                            task.labels.map((label) => (
+                                              <span
+                                                key={label}
+                                                className="px-2 py-1 bg-purple-100 text-purple-600 rounded-full"
+                                              >
+                                                @{label}
+                                              </span>
+                                            ))}
+                                          {task.due && (
+                                            <span
+                                              className={`px-2 py-1 rounded-full ${
+                                                isTaskOverdue(task)
+                                                  ? "bg-red-100 text-red-600"
+                                                  : isTaskDueToday(task)
+                                                    ? "bg-orange-100 text-orange-600"
+                                                    : "bg-gray-100 text-gray-600"
+                                              }`}
+                                            >
+                                              {isTaskDueToday(task)
+                                                ? "Today"
+                                                : isTaskOverdue(task)
+                                                  ? "Overdue"
+                                                  : new Date(
+                                                      task.due,
+                                                    ).toLocaleDateString()}
+                                            </span>
+                                          )}
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                      {task.source === "todoist" && (
+                                        <>
+                                          <button
+                                            onClick={() =>
+                                              handleDeleteTask(task.id)
+                                            }
+                                            className="p-1 rounded-full hover:bg-gray-200 text-red-500"
+                                            title="Delete Task"
+                                          >
+                                            <svg
+                                              xmlns="http://www.w3.org/2000/svg"
+                                              width="20"
+                                              height="20"
+                                              viewBox="0 0 24 24"
+                                              fill="none"
+                                              stroke="currentColor"
+                                              strokeWidth="2"
+                                              strokeLinecap="round"
+                                              strokeLinejoin="round"
+                                              className="lucide lucide-trash-2"
+                                            >
+                                              <path d="M3 6h18" />
+                                              <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                                              <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                                              <line
+                                                x1="10"
+                                                x2="10"
+                                                y1="11"
+                                                y2="17"
+                                              />
+                                              <line
+                                                x1="14"
+                                                x2="14"
+                                                y1="11"
+                                                y2="17"
+                                              />
+                                            </svg>
+                                          </button>
+                                          <button
+                                            onClick={() => {
+                                              setEditingTask(task);
+                                              setShowEditTaskModal(true);
+                                            }}
+                                            className="p-1 rounded-full hover:bg-gray-200 text-blue-500"
+                                            title="Edit Task"
+                                          >
+                                            <svg
+                                              xmlns="http://www.w3.org/2000/svg"
+                                              width="20"
+                                              height="20"
+                                              viewBox="0 0 24 24"
+                                              fill="none"
+                                              stroke="currentColor"
+                                              strokeWidth="2"
+                                              strokeLinecap="round"
+                                              strokeLinejoin="round"
+                                              className="lucide lucide-edit"
+                                            >
+                                              <path d="M22 13.0476V22H2V2h10.0476" />
+                                              <path d="M17.477 3.35146 14.07 6.75841" />
+                                              <path d="M14.07 6.75841 12.042 4.73045" />
+                                              <path d="M12.042 4.73045 15.449 1.3235" />
+                                              <path d="M15.449 1.3235 17.477 3.35146" />
+                                              <path d="M17.477 3.35146 20.884 6.75841" />
+                                              <path d="M20.884 6.75841 18.856 8.78637" />
+                                              <path d="M18.856 8.78637 15.449 5.37941" />
+                                              <path d="M15.449 5.37941 17.477 3.35146Z" />
+                                            </svg>
+                                          </button>
+                                        </>
+                                      )}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </Draggable>
+                    ),
                   )}
+                  {provided.placeholder}
                 </div>
               )}
-
-              {groupTasks.map((task) => (
-                <div
-                  key={task.id}
-                  className="bg-white rounded-xl p-4 shadow-sm border flex items-center justify-between hover:shadow-md transition-shadow"
-                >
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      className="mr-3 rounded"
-                      checked={task.completed}
-                      onChange={() =>
-                        handleTaskCompletionToggle(task.id, task.completed)
-                      }
-                    />
-                    <div>
-                      <p
-                        className={`font-medium ${task.completed ? "line-through text-gray-500" : "text-gray-900"}`}
-                      >
-                        {task.content || task.title}
-                      </p>
-                      <div className="flex items-center text-xs text-gray-500 mt-1 space-x-2">
-                        {task.priority && (
-                          <span
-                            className={`px-2 py-1 rounded-full ${
-                              task.priority === 4
-                                ? "bg-red-100 text-red-600"
-                                : task.priority === 3
-                                  ? "bg-yellow-100 text-yellow-600"
-                                  : task.priority === 2
-                                    ? "bg-green-100 text-green-600"
-                                    : "bg-gray-100 text-gray-600"
-                            }`}
-                          >
-                            P{task.priority}
-                          </span>
-                        )}
-                        {task.project_name && (
-                          <span className="px-2 py-1 bg-blue-100 text-blue-600 rounded-full">
-                            {task.project_name
-                              .toLowerCase()
-                              .includes("bridge club")
-                              ? "Bridge Club"
-                              : task.project_name}
-                          </span>
-                        )}
-                        {task.labels &&
-                          task.labels.length > 0 &&
-                          task.labels.map((label) => (
-                            <span
-                              key={label}
-                              className="px-2 py-1 bg-purple-100 text-purple-600 rounded-full"
-                            >
-                              @{label}
-                            </span>
-                          ))}
-                        {task.due && (
-                          <span
-                            className={`px-2 py-1 rounded-full ${
-                              isTaskOverdue(task)
-                                ? "bg-red-100 text-red-600"
-                                : isTaskDueToday(task)
-                                  ? "bg-orange-100 text-orange-600"
-                                  : "bg-gray-100 text-gray-600"
-                            }`}
-                          >
-                            {isTaskDueToday(task)
-                              ? "Today"
-                              : isTaskOverdue(task)
-                                ? "Overdue"
-                                : new Date(task.due).toLocaleDateString()}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    {task.source === "todoist" && (
-                      <>
-                        <button
-                          onClick={() => handleDeleteTask(task.id)}
-                          className="p-1 rounded-full hover:bg-gray-200 text-red-500"
-                          title="Delete Task"
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="20"
-                            height="20"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="lucide lucide-trash-2"
-                          >
-                            <path d="M3 6h18" />
-                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                            <line x1="10" x2="10" y1="11" y2="17" />
-                            <line x1="14" x2="14" y1="11" y2="17" />
-                          </svg>
-                        </button>
-                        <button
-                          onClick={() => {
-                            setEditingTask(task);
-                            setShowEditTaskModal(true);
-                          }}
-                          className="p-1 rounded-full hover:bg-gray-200 text-blue-500"
-                          title="Edit Task"
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="20"
-                            height="20"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="lucide lucide-edit"
-                          >
-                            <path d="M22 13.0476V22H2V2h10.0476" />
-                            <path d="M17.477 3.35146 14.07 6.75841" />
-                            <path d="M14.07 6.75841 12.042 4.73045" />
-                            <path d="M12.042 4.73045 15.449 1.3235" />
-                            <path d="M15.449 1.3235 17.477 3.35146" />
-                            <path d="M17.477 3.35146 20.884 6.75841" />
-                            <path d="M20.884 6.75841 18.856 8.78637" />
-                            <path d="M18.856 8.78637 15.449 5.37941" />
-                            <path d="M15.449 5.37941 17.477 3.35146Z" />
-                          </svg>
-                        </button>
-                      </>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          ))}
+            </Droppable>
+          </DragDropContext>
+        )}
       </div>
 
       {showAddTaskModal && (

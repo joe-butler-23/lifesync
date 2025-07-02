@@ -15,7 +15,12 @@ class ClaudeService {
       throw new Error('Claude API key not configured. Please add your API key in Settings.');
     }
 
+    if (!apiKey.startsWith('sk-ant-')) {
+      throw new Error('Invalid Claude API key format. Please check your API key in Settings.');
+    }
+
     try {
+      console.log('Sending request to Claude API...');
       const response = await fetch('/api/claude', {
         method: 'POST',
         headers: {
@@ -31,12 +36,27 @@ class ClaudeService {
         })
       });
 
+      console.log('Claude API response status:', response.status);
+
       if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
-        throw new Error(`Claude API error: ${response.status} - ${errorData?.error?.message || 'Unknown error'}`);
+        const errorText = await response.text();
+        console.error('Claude API error response:', errorText);
+        let errorData;
+        try {
+          errorData = JSON.parse(errorText);
+        } catch {
+          errorData = { error: { message: errorText } };
+        }
+        throw new Error(`Claude API error: ${response.status} - ${errorData?.error?.message || errorData?.error || 'Unknown error'}`);
       }
 
       const data = await response.json();
+      console.log('Claude API response data:', data);
+      
+      if (!data || Object.keys(data).length === 0) {
+        throw new Error('Received empty response from Claude API');
+      }
+      
       return data;
     } catch (error) {
       console.error('Claude service error:', error);

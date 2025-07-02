@@ -6,22 +6,15 @@ import { mockRecipes, mockWorkouts } from '../constants/mockData';
 const Dashboard = ({
   selectedDate,
   setSelectedDate,
-  showDatePicker,
-  setShowDatePicker,
   tasks,
   getTasksForDate,
   scratchpadContent,
   setScratchpadContent,
   handleTaskCompletionToggle,
   scheduledRecipes = {},
+  setScheduledRecipes,
   scheduledWorkouts = {},
-  dayTaskFilter,
-  setDayTaskFilter,
-  setShowAddTaskModal,
-  setEditingTask,
-  setShowEditTaskModal,
-  editingTask,
-  showEditTaskModal
+  setScheduledWorkouts
 }) => {
 
 

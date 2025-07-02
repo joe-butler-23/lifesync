@@ -1,51 +1,41 @@
 # Life Dashboard
 
-A React-based dashboard for integrating Google Calendar and Todoist tasks.
+Life Dashboard is a React application that centralizes tasks, events, workouts and meals into a single planning interface. It integrates with Todoist, Google Calendar and an optional Claude AI assistant.
 
 ## Environment Variables
 
-The application expects the following environment variables to be defined:
+Create a `.env` file in the project root and define:
 
-- `REACT_APP_GOOGLE_CLIENT_ID` – OAuth client ID for Google Calendar.
-- `REACT_APP_GOOGLE_API_KEY` – Google API key used for initializing the client.
-
-Create a `.env` file in the project root and add these keys before running the app:
-
-```bash
+```
 REACT_APP_GOOGLE_CLIENT_ID=your-google-client-id
 REACT_APP_GOOGLE_API_KEY=your-google-api-key
+# optional Anthropic API key
+REACT_APP_ANTHROPIC_API_KEY=your-anthropic-key
 ```
 
 ## Development
 
-Install dependencies and start the development server:
-
-```bash
-npm install
-npm start
-```
-=======
-Life Dashboard is a React application that centralizes tasks, events, workouts and meals into a single planning interface. It integrates with Todoist for task management and Google Calendar for event scheduling. Drag and drop support lets you plan your week by arranging tasks, recipes and workouts on a calendar.
-
-## Setup
-
-1. Install dependencies:
+1. Install dependencies
    ```bash
    npm install
    ```
-2. Start the development server:
+2. Start the backend API (serves `/api/claude`)
+   ```bash
+   npm run server
+   ```
+3. In another terminal start the React dev server
    ```bash
    npm start
    ```
 
-The application runs on port 3000 by default.
+The React server proxies unknown requests to the backend so `/api/claude` works during development.
 
 ## Major Features
 
-- **Todoist integration** – fetch, add and update tasks directly from your Todoist account.
-- **Google Calendar integration** – view, edit and delete events from your Google Calendar after connecting with an access token.
-- **Weekly planner** – drag tasks, recipes and workouts onto specific days of the week.
-- **Day planner** – see today's tasks, meals, workouts and a scratchpad powered by Deepnotes for quick notes.
-- **Filtering and sorting** – group tasks by date, project, priority or label and filter by custom categories.
+- **Todoist integration** – manage tasks directly from your Todoist account.
+- **Google Calendar integration** – view and update calendar events.
+- **Weekly planner** – drag tasks, recipes and workouts onto specific days.
+- **Day planner** – see today's tasks, meals, workouts and a scratchpad.
+- **Claude AI assistant** – conversational helper powered by Anthropic.
 
-Before using the integrations, update the API keys in `GoogleCalendarService.js` and supply your Todoist token in the settings screen.
+API keys can also be stored in the Settings screen.

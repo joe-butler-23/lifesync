@@ -68,7 +68,7 @@ const LifeDashboardApp = () => {
   
   // Claude API integration state
   const [claudeApiKey, setClaudeApiKey] = useState(
-    localStorage.getItem("claudeApiKey") || ""
+    localStorage.getItem("claude_api_key") || ""
   );
   const [claudeApiError, setClaudeApiError] = useState(null);
   // Week start state - must be declared early since other functions depend on it
@@ -317,7 +317,7 @@ const LifeDashboardApp = () => {
 
   const handleSaveClaudeApiKey = () => {
     if (claudeApiKey.trim()) {
-      localStorage.setItem("claudeApiKey", claudeApiKey);
+      localStorage.setItem("claude_api_key", claudeApiKey);
       setClaudeApiError(null);
       // You can add validation here if needed
     } else {

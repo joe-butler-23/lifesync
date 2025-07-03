@@ -42,7 +42,7 @@ mode = "sequential"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "npm run build"
+args = "npm run build --silent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"

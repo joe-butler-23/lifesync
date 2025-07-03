@@ -1,7 +1,6 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { ChevronRight, ChevronDown, ChevronLeft, Calendar, Clock, MapPin, AlertCircle, CheckSquare, Edit3, Save, X, Trash2, MoreHorizontal, Filter, Plus, Utensils, Dumbbell, MessageCircle } from 'lucide-react';
+import React, { useState } from 'react';
+import { ChevronRight, ChevronLeft, Calendar, CheckSquare, Plus, Utensils, Dumbbell, MessageCircle } from 'lucide-react';
 import OutlinerEditor from './OutlinerEditor';
-import ClaudeAssistant from './ClaudeAssistant';
 import { mockRecipes, mockWorkouts } from '../constants/mockData';
 
 function Dashboard({
@@ -92,10 +91,7 @@ function Dashboard({
   };
 
   const filteredDayTasks = getFilteredDayTasks();
-  const [showDatePicker, setShowDatePicker] = useState(false); // Added missing state
-  const [editingTask, setEditingTask] = useState(null); // Added missing state
-  const [showEditTaskModal, setShowEditTaskModal] = useState(false); // Added missing state
-  const [showAddTaskModal, setShowAddTaskModal] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
   return (
     <div className="p-6 space-y-6">
       {/* Day Navigation */}
@@ -394,15 +390,6 @@ function Dashboard({
                   <div
                     key={task.id}
                     className="p-3 bg-blue-50 rounded-lg border border-blue-200 cursor-pointer hover:bg-blue-100 transition-colors"
-                    onClick={() => {
-                      if (task.source === "todoist") {
-                        console.log("Clicking task:", task.id, "setEditingTask exists:", !!setEditingTask);
-                        if (setEditingTask && setShowEditTaskModal) {
-                          setEditingTask(task);
-                          setShowEditTaskModal(true);
-                        }
-                      }
-                    }}
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex items-start">

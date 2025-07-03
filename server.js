@@ -3,6 +3,16 @@ const path = require('path');
 const fetch = typeof global.fetch === 'function'
   ? global.fetch
   : (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
+
+// Handle path-to-regexp errors
+process.on('uncaughtException', (err) => {
+  if (err.message.includes('pathToRegexpError')) {
+    console.log('Ignoring path-to-regexp error, continuing...');
+    return;
+  }
+  throw err;
+});
+
 const app = express();
 
 app.use(express.json());
@@ -85,7 +95,12 @@ app.post('/api/claude', async (req, res) => {
 
 // Catch all handler: send back React's index.html file for any non-API routes
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'build/index.html'));
+  try {
+    res.sendFile(path.join(__dirname, 'build/index.html'));
+  } catch (error) {
+    console.error('Error serving index.html:', error);
+    res.status(500).send('Server Error');
+  }
 });
 
 const PORT = process.env.PORT || 5000;

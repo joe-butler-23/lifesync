@@ -1,10 +1,14 @@
 const express = require('express');
+const path = require('path');
 const fetch = typeof global.fetch === 'function'
   ? global.fetch
   : (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 const app = express();
 
 app.use(express.json());
+
+// Serve static files from React build
+app.use(express.static(path.join(__dirname, 'build')));
 
 // CORS middleware for development
 app.use((req, res, next) => {
@@ -77,6 +81,11 @@ app.post('/api/claude', async (req, res) => {
     console.error('API handler error:', error);
     res.status(500).json({ error: { message: `Server error: ${error.message}` } });
   }
+});
+
+// Catch all handler: send back React's index.html file for any non-API routes
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'build/index.html'));
 });
 
 const PORT = process.env.PORT || 5000;

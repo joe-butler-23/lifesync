@@ -18,7 +18,8 @@ function Dashboard({
   scheduledWorkouts = {},
   setScheduledWorkouts,
   selectedDate,
-  setSelectedDate
+  setSelectedDate,
+  setShowAddTaskModal
 }) {
 
 

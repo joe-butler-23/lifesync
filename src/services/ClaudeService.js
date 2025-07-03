@@ -93,14 +93,16 @@ Always respond with JSON containing:
 }
 
 Available action types:
-- NAVIGATE: { "view": "dashboard|planner|tasks|claude|settings" }
+- NAVIGATE: { "view": "dashboard|planner|tasks|claude|settings" } (only use when user explicitly requests to go to a different view)
 - UPDATE_TASK: { "taskId": "id", "updates": {...} }
 - ADD_TASK: { "content": "text", "dueDate": "date", "priority": 1-4 }
 - SCHEDULE_RECIPE: { "recipeId": "id", "date": "YYYY-MM-DD", "mealType": "lunch|dinner" }
 - SCHEDULE_WORKOUT: { "workoutId": "id", "date": "YYYY-MM-DD" }
 - UPDATE_SCRATCHPAD: { "content": "text", "date": "YYYY-MM-DD" }
 - SET_DATE: { "date": "YYYY-MM-DD" }
-- APPLY_FILTER: { "filterType": "tasks|day", "filter": "filter_name" }`;
+- APPLY_FILTER: { "filterType": "tasks|day", "filter": "filter_name" }
+
+Important: Do NOT include NAVIGATE actions unless the user specifically asks to go to a different view. Users asking general questions should stay in the current view.`;
 
     const messages = [
       {

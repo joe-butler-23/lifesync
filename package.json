@@ -6,6 +6,7 @@
     "@hello-pangea/dnd": "^18.0.1",
     "autoprefixer": "^10.4.21",
     "deepnotes-editor": "^0.1.6",
+    "express": "^5.1.0",
     "lucide-react": "^0.292.0",
     "node-fetch": "^3.3.2",
     "postcss": "^8.5.6",

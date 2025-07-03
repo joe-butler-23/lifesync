@@ -20,7 +20,7 @@ localPort = 5000
 externalPort = 5000
 
 [workflows]
-runButton = "Build and Serve"
+runButton = "Dev Server"
 
 [[workflows.workflow]]
 name = "Start Full App"
@@ -43,6 +43,19 @@ mode = "sequential"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "npm run build --silent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "node server.js"
+
+[[workflows.workflow]]
+name = "Dev Server"
+author = 43883021
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run build"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"

@@ -17,7 +17,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { messages, context, systemPrompt, model = 'claude-3-sonnet-20240229', max_tokens = 2000 } = req.body;
+    const { messages, context, systemPrompt, model = 'claude-3-5-sonnet-20241022', max_tokens = 2000 } = req.body;
     const apiKey = req.headers['x-api-key'];
 
     if (!apiKey || !apiKey.startsWith('sk-ant-')) {

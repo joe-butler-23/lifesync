@@ -28,6 +28,12 @@ app.use((req, res, next) => {
 // Serve static files from React build directory
 app.use(express.static(path.join(__dirname, 'build')));
 
+// Check if build directory exists
+const buildPath = path.join(__dirname, 'build');
+if (!require('fs').existsSync(buildPath)) {
+  console.warn('Build directory not found. Make sure to run "npm run build" first.');
+}
+
 // Claude API proxy endpoint
 app.post('/api/claude', async (req, res) => {
   try {
@@ -104,4 +110,5 @@ app.get('/*', (req, res) => {
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`Server accessible at http://0.0.0.0:${PORT}`);
 });

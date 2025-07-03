@@ -1,4 +1,3 @@
-
 const express = require('express');
 const path = require('path');
 const fetch = typeof global.fetch === 'function'
@@ -7,15 +6,16 @@ const fetch = typeof global.fetch === 'function'
 
 const app = express();
 
+// Middleware
 app.use(express.json());
 
 // Serve static files from React build
 app.use(express.static(path.join(__dirname, 'build')));
 
-// CORS middleware for development
+// CORS middleware
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-api-key');
   if (req.method === 'OPTIONS') {
     res.status(200).end();
@@ -24,6 +24,7 @@ app.use((req, res, next) => {
   next();
 });
 
+// API route
 app.post('/api/claude', async (req, res) => {
   try {
     const {
@@ -36,10 +37,7 @@ app.post('/api/claude', async (req, res) => {
     const apiKey = req.headers['x-api-key'];
 
     if (!apiKey || !apiKey.startsWith('sk-ant-')) {
-      res
-        .status(400)
-        .json({ error: { message: 'Valid Claude API key required' } });
-      return;
+      return res.status(400).json({ error: { message: 'Valid Claude API key required' } });
     }
 
     console.log('Forwarding request to Claude API...');
@@ -65,8 +63,7 @@ app.post('/api/claude', async (req, res) => {
     if (!response.ok) {
       const errorText = await response.text();
       console.error('Claude API error:', errorText);
-      res.status(response.status).json({ error: { message: errorText } });
-      return;
+      return res.status(response.status).json({ error: { message: errorText } });
     }
 
     const data = await response.json();
@@ -85,24 +82,12 @@ app.post('/api/claude', async (req, res) => {
   }
 });
 
-// Catch all handler: send back React's index.html file for any non-API routes
-app.get('/*', (req, res) => {
+// Serve React app for all other routes
+app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
 
-// Error handling middleware (must be last)
-app.use((err, req, res, next) => {
-  console.error('Express error:', err);
-  res.status(500).json({ error: 'Internal server error' });
-});
-
 const PORT = process.env.PORT || 5000;
-const server = app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Backend listening on port ${PORT}`);
-  console.log(`Server is running and accessible at http://0.0.0.0:${PORT}`);
-});
-
-server.on('error', (err) => {
-  console.error('Server error:', err);
-  process.exit(1);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server running on port ${PORT}`);
 });

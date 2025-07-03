@@ -1,6 +1,101 @@
-The code modification enhances Todoist integration by adding token validation and improved error logging.
-```
-``````text
+
+// The code modification enhances Todoist integration by adding token validation and improved error logging.
+
+import React, { useState, useEffect, useCallback } from "react";
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import {
+  Calendar,
+  CheckSquare,
+  Plus,
+  Settings as SettingsIcon,
+  Menu,
+  X,
+  GripVertical,
+  Clock,
+  Flag,
+  ChevronLeft,
+  ChevronRight,
+  Utensils,
+  Dumbbell,
+  MessageCircle,
+} from "lucide-react";
+
+// Import services
+import TodoistService from "./services/TodoistService";
+import GoogleCalendarService from "./services/GoogleCalendarService";
+
+// Import components
+import Sidebar from "./components/common/Sidebar";
+import Dashboard from "./components/Dashboard";
+import TasksView from "./components/TasksView";
+import Settings from "./components/Settings";
+import ClaudeAssistant from "./components/ClaudeAssistant";
+import EditTaskModal from "./components/tasks/EditTaskModal";
+import EditEventModal from "./components/events/EditEventModal";
+
+// Import utilities and constants
+import { toDateKey, parseDateKey, formatWeekRange, getWeekDates } from "./utils/dateUtils";
+import { filterUnscheduledTasks, applyTaskFilters, sortTasks, groupTasks } from "./utils/taskUtils";
+import { mockRecipes, mockWorkouts } from "./constants/mockData";
+
+// Debug flag
+const DEBUG = false;
+
+function App() {
+  // View state
+  const [activeView, setActiveView] = useState("dashboard");
+
+  // Integration tokens/states
+  const [todoistToken, setTodoistToken] = useState(() => {
+    return localStorage.getItem("todoistToken") || "";
+  });
+  const [googleCalendarToken, setGoogleCalendarToken] = useState(() => {
+    return localStorage.getItem("googleCalendarToken") || "";
+  });
+  const [claudeApiKey, setClaudeApiKey] = useState(() => {
+    return localStorage.getItem("claude_api_key") || "";
+  });
+
+  // Data states
+  const [todoistTasks, setTodoistTasks] = useState([]);
+  const [googleCalendarEvents, setGoogleCalendarEvents] = useState([]);
+  const [availableProjects, setAvailableProjects] = useState([]);
+
+  // Loading and error states
+  const [loadingTodoistTasks, setLoadingTodoistTasks] = useState(false);
+  const [loadingGoogleCalendarEvents, setLoadingGoogleCalendarEvents] = useState(false);
+  const [todoistError, setTodoistError] = useState(null);
+  const [googleCalendarError, setGoogleCalendarError] = useState(null);
+  const [claudeApiError, setClaudeApiError] = useState(null);
+
+  // Week navigation state
+  const [currentWeekStart, setCurrentWeekStart] = useState(() => {
+    const today = new Date();
+    const dayOfWeek = today.getDay();
+    const startOfWeek = new Date(today);
+    startOfWeek.setDate(today.getDate() - dayOfWeek);
+    startOfWeek.setHours(0, 0, 0, 0);
+    return startOfWeek;
+  });
+
+  // Derived state
+  const tasks = todoistTasks;
+  const weekDates = getWeekDates(currentWeekStart);
+  const unscheduledTasks = tasks.filter((task) => !task.due && !task.completed);
+
+  // Todoist Integration
+  const fetchTodoistTasks = useCallback(
+    async (token) => {
+      if (!token) return;
+
+      setLoadingTodoistTasks(true);
+      setTodoistError(null);
+      try {
+        const [fetchedTasks, fetchedProjects] = await Promise.all([
+          TodoistService.getTasks(token),
+          TodoistService.getProjects(token),
+        ]);
+
         const projectMap = {};
         fetchedProjects.forEach((project) => {
           projectMap[project.id] = project.name;
@@ -440,7 +535,6 @@ The code modification enhances Todoist integration by adding token validation an
       setLoadingTodoistTasks(false);
     }
   };
-
 
   // Modal components now imported from separate files
 
@@ -919,8 +1013,7 @@ The code modification enhances Todoist integration by adding token validation an
                 >
                   <button
                     onClick={() => setTaskFilter("all")}
-                    className={`px-3 py-1 rounded-full text-xs font```text
--medium ${
+                    className={`px-3 py-1 rounded-full text-xs font-medium ${
                       taskFilter === "all"
                         ? "bg-blue-600 text-white"
                         : "bg-gray-100 text-gray-600 hover:bg-gray-200"
@@ -1424,6 +1517,40 @@ The code modification enhances Todoist integration by adding token validation an
     );
   };
 
+  // Add the missing Google Calendar functions
+  const fetchGoogleCalendarEvents = useCallback(
+    async (token) => {
+      if (!token) return;
+
+      setLoadingGoogleCalendarEvents(true);
+      setGoogleCalendarError(null);
+      try {
+        const events = await GoogleCalendarService.getEvents(
+          new Date(currentWeekStart),
+          new Date(currentWeekStart.getTime() + 7 * 24 * 60 * 60 * 1000)
+        );
+        setGoogleCalendarEvents(events);
+        localStorage.setItem("googleCalendarToken", token);
+      } catch (error) {
+        setGoogleCalendarError(error);
+        console.error("Failed to fetch Google Calendar events:", error);
+      } finally {
+        setLoadingGoogleCalendarEvents(false);
+      }
+    },
+    [currentWeekStart, setLoadingGoogleCalendarEvents, setGoogleCalendarError]
+  );
+
+  const handleGoogleAuthClick = async () => {
+    try {
+      const token = await GoogleCalendarService.authenticate();
+      setGoogleCalendarToken(token);
+      fetchGoogleCalendarEvents(token);
+    } catch (error) {
+      setGoogleCalendarError(error);
+      console.error("Google authentication failed:", error);
+    }
+  };
 
   const renderContent = () => {
     switch (activeView) {
@@ -1881,3 +2008,55 @@ The code modification enhances Todoist integration by adding token validation an
     fetchTodoistTasks,
     navigateWeek: navigateWeek
   };
+
+  return (
+    <DragDropContext onDragEnd={onDragEnd}>
+      <div className="flex h-screen bg-gray-50">
+        {/* Sidebar */}
+        <Sidebar
+          activeView={activeView}
+          setActiveView={setActiveView}
+          sidebarCollapsed={sidebarCollapsed}
+          setSidebarCollapsed={setSidebarCollapsed}
+        />
+
+        {/* Main Content */}
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <main className="flex-1 overflow-y-auto">
+            {renderContent()}
+          </main>
+        </div>
+
+        {/* Modals */}
+        {showEditTaskModal && editingTask && (
+          <EditTaskModal
+            task={editingTask}
+            onSave={handleEditTask}
+            onClose={() => {
+              setShowEditTaskModal(false);
+              setEditingTask(null);
+            }}
+          />
+        )}
+
+        {showEditEventModal && editingEvent && (
+          <EditEventModal
+            event={editingEvent}
+            onSave={(eventId, updates) => {
+              // Handle event updates here
+              console.log("Event update:", eventId, updates);
+              setShowEditEventModal(false);
+              setEditingEvent(null);
+            }}
+            onClose={() => {
+              setShowEditEventModal(false);
+              setEditingEvent(null);
+            }}
+          />
+        )}
+      </div>
+    </DragDropContext>
+  );
+}
+
+export default App;

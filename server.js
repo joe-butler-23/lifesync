@@ -1,3 +1,4 @@
+
 const express = require('express');
 const path = require('path');
 const fetch = typeof global.fetch === 'function'
@@ -85,13 +86,8 @@ app.post('/api/claude', async (req, res) => {
 });
 
 // Catch all handler: send back React's index.html file for any non-API routes
-app.get('*', (req, res) => {
-  try {
-    res.sendFile(path.join(__dirname, 'build/index.html'));
-  } catch (error) {
-    console.error('Error serving index.html:', error);
-    res.status(500).send('Server Error');
-  }
+app.get('/*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
 
 // Error handling middleware (must be last)

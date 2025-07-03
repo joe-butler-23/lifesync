@@ -1534,7 +1534,7 @@ function App() {
 
   const handleGoogleAuthClick = async () => {
     try {
-      const token = await GoogleCalendarService.authenticate();
+      const token = await GoogleCalendarService.handleAuthClick();
       setGoogleCalendarToken(token);
       fetchGoogleCalendarEvents(token);
     } catch (error) {

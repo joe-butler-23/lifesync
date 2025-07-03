@@ -6,10 +6,11 @@ const fetch = typeof global.fetch === 'function'
 
 // Handle path-to-regexp errors
 process.on('uncaughtException', (err) => {
-  if (err.message.includes('pathToRegexpError')) {
+  if (err.message.includes('pathToRegexpError') || err.message.includes('path-to-regexp')) {
     console.log('Ignoring path-to-regexp error, continuing...');
     return;
   }
+  console.error('Uncaught Exception:', err);
   throw err;
 });
 

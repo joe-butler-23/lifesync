@@ -20,7 +20,7 @@ localPort = 5000
 externalPort = 5000
 
 [workflows]
-runButton = "Dev Server"
+runButton = "Quick Dev"
 
 [[workflows.workflow]]
 name = "Start Full App"
@@ -56,6 +56,15 @@ mode = "sequential"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "npm run build"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "node server.js"
+
+[[workflows.workflow]]
+name = "Quick Dev"
+author = 43883021
+mode = "sequential"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"

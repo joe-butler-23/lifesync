@@ -6,18 +6,9 @@ import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import {
   Calendar,
   CheckSquare,
-  Plus,
-  Settings as SettingsIcon,
-  Menu,
-  X,
   GripVertical,
-  Clock,
-  Flag,
-  ChevronLeft,
-  ChevronRight,
   Utensils,
   Dumbbell,
-  MessageCircle,
 } from "lucide-react";
 
 // Import services
@@ -35,7 +26,7 @@ import EditEventModal from "./components/events/EditEventModal";
 
 // Import utilities and constants
 import { toDateKey, parseDateKey, formatWeekRange, getWeekDates } from "./utils/dateUtils";
-import { filterUnscheduledTasks, applyTaskFilters, sortTasks, groupTasks } from "./utils/taskUtils";
+import { filterUnscheduledTasks } from "./utils/taskUtils";
 import { mockRecipes, mockWorkouts } from "./constants/mockData";
 
 // Debug flag

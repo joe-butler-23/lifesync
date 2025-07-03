@@ -1,7 +1,24 @@
 
 import React, { useState } from 'react';
 import { Brain, X } from 'lucide-react';
-import { useClaudeIntegration } from '../hooks/useClaudeIntegration';
+// import { useClaudeIntegration } from '../hooks/useClaudeIntegration';
+
+const ClaudeButton = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  
+  return (
+    <div className="fixed bottom-4 right-4 z-50">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg transition-colors"
+      >
+        <Brain className="w-6 h-6" />
+      </button>
+    </div>
+  );
+};
+
+export default ClaudeButton;
 
 const ClaudeButton = ({ 
   component, 

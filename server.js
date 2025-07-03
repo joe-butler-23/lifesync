@@ -99,9 +99,8 @@ app.post('/api/claude', async (req, res) => {
 });
 
 // Handle React routing - serve index.html for all other requests
-// Express 5 uses path-to-regexp v8 which does not allow '*' as a route
-// Using '*' without the slash works with the newer path-to-regexp version
-app.get('*', (req, res) => {
+// Using a more explicit pattern that works with path-to-regexp v8
+app.get(/.*/, (req, res) => {
   res.sendFile(path.resolve(__dirname, 'build', 'index.html'));
 });
 

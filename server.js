@@ -1,4 +1,7 @@
 const express = require('express');
+const fetch = typeof global.fetch === 'function'
+  ? global.fetch
+  : (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 const app = express();
 
 app.use(express.json());

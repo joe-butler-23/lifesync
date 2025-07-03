@@ -99,9 +99,13 @@ app.post('/api/claude', async (req, res) => {
 });
 
 // Handle React routing - serve index.html for all other requests
-// Using a more explicit pattern that works with path-to-regexp v8
-app.get(/.*/, (req, res) => {
-  res.sendFile(path.resolve(__dirname, 'build', 'index.html'));
+// Using a function that bypasses path-to-regexp entirely
+app.use((req, res, next) => {
+  if (req.method === 'GET' && !req.path.startsWith('/api/') && !req.path.startsWith('/static/')) {
+    res.sendFile(path.resolve(__dirname, 'build', 'index.html'));
+  } else {
+    next();
+  }
 });
 
 // Start server

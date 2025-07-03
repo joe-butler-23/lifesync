@@ -8,8 +8,7 @@ class TodoistService {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
-        },
-        mode: 'cors'
+        }
       });
 
       if (!response.ok) {
@@ -30,8 +29,7 @@ class TodoistService {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
-        },
-        mode: 'cors'
+        }
       });
 
       if (!response.ok) {

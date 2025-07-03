@@ -4,6 +4,7 @@ const Settings = () => {
   const [todoistToken, setTodoistToken] = useState('');
   const [claudeApiKey, setClaudeApiKey] = useState('');
   const [claudeApiError, setClaudeApiError] = useState(null);
+  const [loadingTodoistTasks, setLoadingTodoistTasks] = useState(false);
 
   useEffect(() => {
     // Load saved tokens
@@ -50,6 +51,19 @@ const Settings = () => {
     }
   };
 
+  const fetchTodoistTasks = async (token) => {
+    setLoadingTodoistTasks(true);
+    try {
+      // Replace with actual API call to Todoist
+      console.log('Fetching Todoist tasks with token:', token);
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+      console.log('Todoist tasks fetched successfully');
+    } catch (error) {
+      console.error('Error fetching Todoist tasks:', error);
+    } finally {
+      setLoadingTodoistTasks(false);
+    }
+  };
 
   return (
     <div className="p-6">
@@ -67,10 +81,22 @@ const Settings = () => {
           />
           <button
             onClick={handleSaveTodoistToken}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 mr-2"
           >
-            Save Token
+            Save and Test Connection
           </button>
+          {todoistToken && (
+            <button
+              onClick={() => {
+                console.log('Manual sync triggered');
+                fetchTodoistTasks(todoistToken);
+              }}
+              className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+              disabled={loadingTodoistTasks}
+            >
+              {loadingTodoistTasks ? 'Syncing...' : 'Force Sync'}
+            </button>
+          )}
         </div>
       </div>
 

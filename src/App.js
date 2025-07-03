@@ -248,7 +248,7 @@ function App() {
   const [dayTaskFilter, setDayTaskFilter] = useState("all"); // 'all', 'bridge_club', 'home', 'uncategorised'
 
   // Sidebar state
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   // Load scratchpad content when selected date changes
   useEffect(() => {
@@ -2007,8 +2007,8 @@ function App() {
         <Sidebar
           activeView={activeView}
           setActiveView={setActiveView}
-          sidebarCollapsed={sidebarCollapsed}
-          setSidebarCollapsed={setSidebarCollapsed}
+          isCollapsed={isSidebarCollapsed}
+          setIsCollapsed={setIsSidebarCollapsed}
         />
 
         {/* Main Content */}

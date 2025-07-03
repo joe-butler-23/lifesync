@@ -7,6 +7,14 @@ const fetch = typeof global.fetch === 'function'
 const app = express();
 
 // Handle path-to-regexp errors
+app.use((err, req, res, next) => {
+  if (err.name === 'TypeError' && err.message.includes('Missing parameter name')) {
+    console.error('Path-to-regexp error:', err.message);
+    res.status(400).json({ error: 'Invalid route pattern' });
+    return;
+  }
+  next(err);
+});
 
 app.use(express.json());
 

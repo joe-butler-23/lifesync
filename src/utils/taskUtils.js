@@ -155,7 +155,21 @@ export const getUnscheduledTasks = (tasks, taskFilter) => {
   return filteredTasks;
 };
 
-export const getTasksForDate = (tasks, date, taskOrder) => {
+export const filterUnscheduledTasks = (tasks, scheduledTasks) => {
+  const scheduledTaskIds = new Set(scheduledTasks.map(task => task.id));
+  return tasks.filter(task => !scheduledTaskIds.has(task.id));
+};
+
+export const getTasksForDate = (tasks, date) => {
+  const dateStr = date.toISOString().split('T')[0];
+  return tasks.filter(task => {
+    if (!task.due_date) return false;
+    const taskDate = new Date(task.due_date).toISOString().split('T')[0];
+    return taskDate === dateStr;
+  });
+};
+
+export const getTasksForDate_old = (tasks, date, taskOrder) => {
   const dateString = toDateKey(date);
   const dayTasks = tasks.filter(
     (task) => task.due && task.due.startsWith(dateString) && !task.completed,
@@ -186,6 +200,17 @@ export const getTasksForDate = (tasks, date, taskOrder) => {
   }
 
   return dayTasks;
+};
+
+export const groupTasksByPriority = (tasks) => {
+  return tasks.reduce((groups, task) => {
+    const priority = task.priority || 1;
+    if (!groups[priority]) {
+      groups[priority] = [];
+    }
+    groups[priority].push(task);
+    return groups;
+  }, {});
 };
 
 export const searchTasks = (tasks, query) => {

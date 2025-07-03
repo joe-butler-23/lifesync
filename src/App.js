@@ -1517,6 +1517,7 @@ function App() {
       setGoogleCalendarError(null);
       try {
         const events = await GoogleCalendarService.getEvents(
+          token,
           new Date(currentWeekStart),
           new Date(currentWeekStart.getTime() + 7 * 24 * 60 * 60 * 1000)
         );

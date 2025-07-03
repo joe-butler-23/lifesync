@@ -2,7 +2,7 @@
 // The code modification enhances Todoist integration by adding token validation and improved error logging.
 
 import React, { useState, useEffect, useCallback } from "react";
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import {
   Calendar,
   CheckSquare,

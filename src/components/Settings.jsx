@@ -2,18 +2,15 @@ import React, { useState, useEffect } from 'react';
 
 const Settings = () => {
   const [todoistToken, setTodoistToken] = useState('');
-  const [googleCalendarToken, setGoogleCalendarToken] = useState('');
   const [claudeApiKey, setClaudeApiKey] = useState('');
   const [claudeApiError, setClaudeApiError] = useState(null);
 
   useEffect(() => {
     // Load saved tokens
     const savedTodoistToken = localStorage.getItem('todoist_token');
-    const savedGoogleToken = localStorage.getItem('google_calendar_token');
     const savedClaudeKey = localStorage.getItem('claude_api_key');
 
     if (savedTodoistToken) setTodoistToken(savedTodoistToken);
-    if (savedGoogleToken) setGoogleCalendarToken(savedGoogleToken);
     if (savedClaudeKey) setClaudeApiKey(savedClaudeKey);
   }, []);
 
@@ -30,7 +27,6 @@ const Settings = () => {
 
   const handleDisconnectGoogle = () => {
     localStorage.removeItem('google_calendar_token');
-    setGoogleCalendarToken('');
     alert('Google Calendar disconnected');
   };
 

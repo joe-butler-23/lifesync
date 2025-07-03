@@ -226,7 +226,7 @@ const OutlinerEditor = ({ content, onChange }) => {
   const handleKeyDown = (e, nodeId, parentId) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      const newId = addNode(parentId, nodeId);
+      addNode(parentId, nodeId);
       // Focus will be set in the addNode function
     } else if (e.key === 'Tab') {
       e.preventDefault();
@@ -272,7 +272,6 @@ const OutlinerEditor = ({ content, onChange }) => {
     const hasChildren = node.children && node.children.length > 0;
     const isExpanded = expandedNodes.has(node.id);
     const isEditing = editingNode === node.id;
-    const isFocused = focusedNode === node.id;
 
     return (
       <div key={node.id} className="select-none">

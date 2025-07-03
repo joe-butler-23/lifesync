@@ -4,6 +4,8 @@ const fetch = typeof global.fetch === 'function'
   ? global.fetch
   : (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 
+const app = express();
+
 // Handle path-to-regexp errors
 process.on('uncaughtException', (err) => {
   if (err.message.includes('pathToRegexpError') || err.message.includes('path-to-regexp')) {
@@ -11,10 +13,8 @@ process.on('uncaughtException', (err) => {
     return;
   }
   console.error('Uncaught Exception:', err);
-  throw err;
+  process.exit(1);
 });
-
-const app = express();
 
 app.use(express.json());
 
@@ -105,7 +105,12 @@ app.get('*', (req, res) => {
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, '0.0.0.0', () => {
+const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`Backend listening on port ${PORT}`);
   console.log(`Server is running and accessible at http://0.0.0.0:${PORT}`);
+});
+
+server.on('error', (err) => {
+  console.error('Server error:', err);
+  process.exit(1);
 });

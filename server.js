@@ -6,16 +6,6 @@ const fetch = typeof global.fetch === 'function'
 
 const app = express();
 
-// Handle path-to-regexp errors
-app.use((err, req, res, next) => {
-  if (err.name === 'TypeError' && err.message.includes('Missing parameter name')) {
-    console.error('Path-to-regexp error:', err.message);
-    res.status(400).json({ error: 'Invalid route pattern' });
-    return;
-  }
-  next(err);
-});
-
 app.use(express.json());
 
 // Serve static files from React build
@@ -102,6 +92,12 @@ app.get('*', (req, res) => {
     console.error('Error serving index.html:', error);
     res.status(500).send('Server Error');
   }
+});
+
+// Error handling middleware (must be last)
+app.use((err, req, res, next) => {
+  console.error('Express error:', err);
+  res.status(500).json({ error: 'Internal server error' });
 });
 
 const PORT = process.env.PORT || 5000;

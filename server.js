@@ -7,14 +7,6 @@ const fetch = typeof global.fetch === 'function'
 const app = express();
 
 // Handle path-to-regexp errors
-process.on('uncaughtException', (err) => {
-  if (err.message.includes('pathToRegexpError') || err.message.includes('path-to-regexp')) {
-    console.log('Ignoring path-to-regexp error, continuing...');
-    return;
-  }
-  console.error('Uncaught Exception:', err);
-  process.exit(1);
-});
 
 app.use(express.json());
 
@@ -95,7 +87,7 @@ app.post('/api/claude', async (req, res) => {
 });
 
 // Catch all handler: send back React's index.html file for any non-API routes
-app.get('*', (req, res) => {
+app.get('/*path', (req, res) => {
   try {
     res.sendFile(path.join(__dirname, 'build/index.html'));
   } catch (error) {

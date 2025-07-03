@@ -87,7 +87,7 @@ app.post('/api/claude', async (req, res) => {
 });
 
 // Catch all handler: send back React's index.html file for any non-API routes
-app.get('/*path', (req, res) => {
+app.get('*', (req, res) => {
   try {
     res.sendFile(path.join(__dirname, 'build/index.html'));
   } catch (error) {
